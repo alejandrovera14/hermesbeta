@@ -1,42 +1,47 @@
 let tablaAuditoria;
 
-function inicializarTablaAuditoria(idUsuario = null) {
-  let url = "ajax/auditoria.ajax.php";
-  if (idUsuario) {
-    url += "?id_usuario=" + idUsuario;
-  }
-
+function inicializarTablaAuditoria() {
   tablaAuditoria = $('#tablaAuditoria').DataTable({
+    processing: true,
+    serverSide: true,
     ajax: {
-      url: url,
-      dataSrc: "data"
+      url: "ajax/serverside/serverside.auditoria.php",
+      type: "GET",
+      error: function (xhr, error, thrown) {
+        console.error("Error AJAX:", thrown);
+        alert("Error al cargar los datos de auditoría.");
+      }
     },
     columns: [
-      { data: "tipo_documento" },
-      { data: "numero_documento" },
-      { data: "nombre" },
-      { data: "apellido" },
-      { data: "nombre_editor" },
-      { data: "fecha_cambio" },
+      { data: 1 }, // tipo_documento
+      { data: 2 }, // numero_documento
+      { data: 3 }, // nombre
+      { data: 4 }, // apellido
+      { data: 5 }, // nombre_editor
+      { data: 6 }, // fecha_cambio
       {
         data: null,
         render: function (data, type, row) {
-          return `<button class="btn btn-info btn-sm btnDetalle" data-detalle='${JSON.stringify({
-            campo_modificado: row.campo_modificado,
-            valor_anterior: row.valor_anterior,
-            valor_nuevo: row.valor_nuevo
-          }).replace(/'/g, "&apos;")}'><i class="fas fa-eye"></i></button>`;
+          const detalle = {
+            campo_modificado: row[7] || '',
+            valor_anterior: row[8] || '',
+            valor_nuevo: row[9] || ''
+          };
+
+          const jsonDetalle = JSON.stringify(detalle).replace(/'/g, "&apos;");
+
+          return `<button class="btn btn-info btn-sm btnDetalle" data-detalle='${jsonDetalle}'><i class="fas fa-eye"></i></button>`;
         }
       },
       {
         data: null,
         visible: false,
         render: function (data, type, row) {
-          let campos = row.campo_modificado.split(';').map(s => s.trim());
-          let valoresAnt = row.valor_anterior.split(';').map(s => s.trim());
-          let valoresNue = row.valor_nuevo.split(';').map(s => s.trim());
+          let campos = (row[7] || '').split(';').map(s => s.trim());
+          let valoresAnt = (row[8] || '').split(';').map(s => s.trim());
+          let valoresNue = (row[9] || '').split(';').map(s => s.trim());
 
-          return campos.map((campo, i) => `${campo}: ${valoresAnt[i]} → ${valoresNue[i]}`).join(" | ");
+          return campos.map((campo, i) => `${campo}: ${valoresAnt[i] || ''} → ${valoresNue[i] || ''}`).join(" | ");
         }
       }
     ],
@@ -61,18 +66,30 @@ function inicializarTablaAuditoria(idUsuario = null) {
 
 $(document).on('click', '.btnDetalle', function () {
   let detalleData = $(this).data('detalle');
-  if (typeof detalleData === 'string') {
-    detalleData = JSON.parse(detalleData.replace(/&apos;/g, "'"));
+
+  if (!detalleData) {
+    alert("No hay datos para mostrar.");
+    return;
   }
 
-  let campos = detalleData.campo_modificado.split(';').map(s => s.trim());
-  let valoresAnt = detalleData.valor_anterior.split(';').map(s => s.trim());
-  let valoresNue = detalleData.valor_nuevo.split(';').map(s => s.trim());
+  if (typeof detalleData === 'string') {
+    try {
+      detalleData = JSON.parse(detalleData.replace(/&apos;/g, "'"));
+    } catch (e) {
+      console.error("Error al parsear JSON:", e);
+      alert("Error al cargar el detalle de auditoría.");
+      return;
+    }
+  }
+
+  let campos = (detalleData.campo_modificado || '').split(';').map(s => s.trim());
+  let valoresAnt = (detalleData.valor_anterior || '').split(';').map(s => s.trim());
+  let valoresNue = (detalleData.valor_nuevo || '').split(';').map(s => s.trim());
 
   let htmlDetalle = '<table class="table table-bordered">';
   htmlDetalle += '<thead><tr><th>Campo Modificado</th><th>Valor Anterior</th><th>Valor Nuevo</th></tr></thead><tbody>';
   for (let i = 0; i < campos.length; i++) {
-    htmlDetalle += `<tr><td>${campos[i]}</td><td>${valoresAnt[i]}</td><td>${valoresNue[i]}</td></tr>`;
+    htmlDetalle += `<tr><td>${campos[i]}</td><td>${valoresAnt[i] || ''}</td><td>${valoresNue[i] || ''}</td></tr>`;
   }
   htmlDetalle += '</tbody></table>';
 
@@ -80,12 +97,11 @@ $(document).on('click', '.btnDetalle', function () {
   $('#modalDetalleAuditoria').modal('show');
 });
 
-
 $(document).ready(function () {
   inicializarTablaAuditoria();
+
   // Filtro por nombre de editor
   $('#filtroEditor').on('keyup change', function () {
     tablaAuditoria.column(4).search(this.value).draw();
   });
-  
 });

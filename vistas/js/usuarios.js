@@ -822,6 +822,8 @@ $(document).on("submit", "#modalImportarUsuarios form", function(e) {
                     });
                 }
             } catch (e) {
+                console.error("Raw server response:", response);
+                console.error("Error parsing JSON:", e);
                 Swal.fire({
                     icon: 'error',
                     title: 'Error inesperado',

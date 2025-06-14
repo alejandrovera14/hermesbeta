@@ -26,6 +26,9 @@
                                         <th>Usuario</th>
                                         <th>Tipo de Préstamo</th>
                                         <th>Estado De Préstamo</th>
+                                        <th>Coo</th>
+                                        <th>TIC</th>
+                                        <th>Alm</th>
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>
@@ -37,23 +40,41 @@
 
 
                                     foreach ($salidas as $key => $value) {
-                                        echo '
-                                        <tr> 
-                                        
-                                            <td>' . $value["id_prestamo"] . '</td>
-                                            <td>' . $value["nombre"] . '</td>
-                                            <td>' . $value["tipo_prestamo"] . '</td>
-                                            <td>' . $value["estado_prestamo"] . '</td>
+                                    echo '<tr> 
                                     
-                                            <td>
-                                                <div class="btn-group">
-                                                    <button class="btn btn-info btn-sm btnVerDetalles" data-id="' . $value["id_prestamo"] . '" data-toggle="modal" data-target="#modalDetallesPrestamo">
-                                                        <i class="fa fa-eye"></i> Ver Detalles
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>';
-                                    }
+                                        <td>' . $value["id_prestamo"] . '</td>
+                                        <td>' . $value["nombre"] . '</td>
+                                        <td>' . $value["tipo_prestamo"] . '</td>
+                                        <td>' . $value["estado_prestamo"] . '</td>';
+
+                                    // Checkbox COORDINADOR
+                                    echo '<td>
+                                        <input type="checkbox" disabled ' . (!empty($value["firmo_coordinador"]) ? 'checked' : '') . ' 
+                                        title="' . (!empty($value["usuario_firma_coordinador"]) ? htmlspecialchars($value["usuario_firma_coordinador"]) : 'Sin firma') . '">
+                                    </td>';
+
+                                    // Checkbox TIC
+                                    echo '<td>
+                                        <input type="checkbox" disabled ' . (!empty($value["firmo_tic"]) ? 'checked' : '') . ' 
+                                        title="' . (!empty($value["usuario_firma_tic"]) ? htmlspecialchars($value["usuario_firma_tic"]) : 'Sin firma') . '">
+                                    </td>';
+
+                                    // Checkbox ALMACENISTA
+                                    echo '<td>
+                                        <input type="checkbox" disabled ' . (!empty($value["firmo_almacenista"]) ? 'checked' : '') . ' 
+                                        title="' . (!empty($value["usuario_firma_almacenista"]) ? htmlspecialchars($value["usuario_firma_almacenista"]) : 'Sin firma') . '">
+                                    </td>';
+
+                                    // Botón de acción
+                                    echo '<td>
+                                        <div class="btn-group">
+                                            <button class="btn btn-info btn-sm btnVerDetalles" data-id="' . $value["id_prestamo"] . '" data-toggle="modal" data-target="#modalDetallesPrestamo">
+                                                <i class="fa fa-eye"></i> Ver Detalles
+                                            </button>
+                                        </div>
+                                    </td>
+                                    </tr>';
+                                }
                                     ?>
                                 </tbody>
                             </table>

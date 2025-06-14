@@ -35,16 +35,17 @@ class Modelosalida
             // Consulta para todos los registros con JOIN (sin cambios aquí)
             $stmt = Conexion::conectar()->prepare(
                 "SELECT p.id_prestamo, u.numero_documento, u.nombre, u.apellido, u.telefono,
-                    f.codigo as ficha_codigo,
-                    p.fecha_inicio, p.fecha_fin, p.tipo_prestamo,
-                    p.estado_prestamo
+        f.codigo as ficha_codigo,
+        p.fecha_inicio, p.fecha_fin, p.tipo_prestamo,
+        p.estado_prestamo
             
                 FROM $tabla p
                 JOIN usuarios u ON p.usuario_id = u.id_usuario
-                LEFT JOIN aprendices_ficha af ON u.id_usuario = af.id_usuario
-                LEFT JOIN fichas f ON af.id_ficha = f.id_ficha
-                WHERE p.estado_prestamo IN ('Autorizado', 'Trámite')
-                ORDER BY p.fecha_inicio DESC"
+    LEFT JOIN aprendices_ficha af ON u.id_usuario = af.id_usuario
+    LEFT JOIN fichas f ON af.id_ficha = f.id_ficha
+    WHERE p.estado_prestamo IN ('Autorizado', 'Trámite', 'Pendiente')
+      AND p.tipo_prestamo != 'Inmediato'
+    ORDER BY p.fecha_inicio DESC"
             );
 
             $stmt->execute();

@@ -49,3 +49,22 @@ DELIMITER ;
 INSERT INTO `permisos`( `id_modulo`, `nombre`, `descripcion`, `estado`) VALUES ('2','Buscar usuario a solicitar','Permite al usuario buscar el solicitante que va a reservar equipos o herramientas','activo');
 
 
+closes [#95](https://github.com/GermanRz/hermesbeta/issues/95)
+trigger creado
+
+DELIMITER $$
+USE `hermes002`$$
+CREATE DEFINER = CURRENT_USER TRIGGER `hermes002`.`prestamos_AFTER_INSERT` AFTER INSERT ON `prestamos` FOR EACH ROW
+BEGIN
+    -- Verificar si el préstamo es de tipo "Inmediato"
+    IF NEW.tipo_prestamo = 'Inmediato' AND NEW.estado_prestamo = 'Prestado' THEN
+        -- Actualizar el estado de los equipos asociados de 1(Disponible) a 2(Prestado)
+        UPDATE equipos e
+        JOIN detalle_prestamo dp ON e.equipo_id = dp.equipo_id
+        SET e.id_estado = 2
+        WHERE dp.id_prestamo = NEW.id_prestamo
+          AND e.id_estado = 1;
+    END IF;
+
+END$$
+DELIMITER ;

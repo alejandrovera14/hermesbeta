@@ -70,6 +70,10 @@ class ControladorSolicitudes
     public static function ctrContarEquiposPorCategoria() {
         return ModeloSolicitudes::mdlContarEquiposPorCategoria();
     }
+    
+    public static function ctrContarEquiposPorReserva() {
+        return ModeloSolicitudes::mdlContarEquiposPorReserva();
+    }
 
     
 

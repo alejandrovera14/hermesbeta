@@ -1,3 +1,14 @@
+    <?php
+        $item = "id_modulo";
+        $valor = 2;
+        $respuesta = ControladorModulos::ctrMostrarModulos($item, $valor);
+        if ($respuesta["estado"] == "inactivo") {
+            echo '<script>
+                window.location = "desactivado";
+            </script>';
+        }
+
+    ?>
 <!-- Contenido Principal -->
 <div class="content-wrapper">
     <section class="content-header">

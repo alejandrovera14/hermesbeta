@@ -1,4 +1,4 @@
-    <?php
+  <?php
         $item = "id_modulo";
         $valor = 7;
         $respuesta = ControladorModulos::ctrMostrarModulos($item, $valor);
@@ -9,10 +9,7 @@
         }
 
     ?>
-    
-    
-    
-    <!-- Content Wrapper. Contains page content -->
+<!-- Content Wrapper. Contains page content -->
     <div class="content-wrapper">
         <!-- Content Header (Page header) -->
         <section class="content-header">

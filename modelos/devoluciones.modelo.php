@@ -64,30 +64,48 @@ class ModeloDevoluciones
 
 
     /*=============================================
-    MARCAR EQUIPO EN DETALLE_PRESTAMO COMO MANTENIMIENTO (ACTUALIZANDO ID_ESTADO)
+    MARCAR EQUIPO EN DETALLE_PRESTAMO COMO MANTENIMIENTO Y ROBADO (ACTUALIZANDO ID_ESTADO)
     =============================================*/
     static public function mdlMarcarMantenimientoDetalle($datos){
+        try {
+            $conexion = Conexion::conectar();
+            $conexion->beginTransaction();
 
-        // ... existing code ...
-        $stmt = Conexion::conectar()->prepare("UPDATE equipos SET id_estado = :id_estado WHERE equipo_id = :equipo_id");
+            // Actualizar estado del equipo
+            $stmt = $conexion->prepare("UPDATE equipos SET id_estado = :id_estado WHERE equipo_id = :equipo_id");
+            $stmt->bindParam(":id_estado", $datos["id_estado"], PDO::PARAM_INT);
+            $stmt->bindParam(":equipo_id", $datos["equipo_id"], PDO::PARAM_INT);
 
-        $stmt->bindParam(":id_estado", $datos["id_estado"], PDO::PARAM_INT);
-        $stmt->bindParam(":equipo_id", $datos["equipo_id"], PDO::PARAM_INT);
+            if(!$stmt->execute()){
+                $conexion->rollBack();
+                error_log("MODELO: Error en execute(): " . json_encode($stmt->errorInfo()));
+                return "error";
+            }
 
-        if($stmt->execute()){ 
-            error_log("MODELO: Update ejecutado con éxito. Filas afectadas: " . $stmt->rowCount()); 
-            // Verificar si realmente se afectaron filas 
-            if ($stmt->rowCount() > 0) { 
-                return "ok"; 
-            } else { 
-                error_log("MODELO: Update ejecutado pero no afectó filas. ¿Coincide equipo_id?"); 
-                return "no_change"; // O algún otro indicador 
-            } 
-        }else{ 
-            error_log("MODELO: Error en execute(): " . json_encode($stmt->errorInfo())); 
+            // Actualizar detalle_prestamo si existe id_prestamo
+            if(isset($datos["id_prestamo"])){
+                $stmtDetalle = $conexion->prepare(
+                    "UPDATE detalle_prestamo SET estado = 'Devuelto', 
+                    fecha_actualizacion = NOW()
+                    WHERE id_prestamo = :id_prestamo AND equipo_id = :equipo_id"
+                );
+                
+                $stmtDetalle->bindParam(":id_prestamo", $datos["id_prestamo"], PDO::PARAM_INT);
+                $stmtDetalle->bindParam(":equipo_id", $datos["equipo_id"], PDO::PARAM_INT);
+                
+                if(!$stmtDetalle->execute()){
+                    $conexion->rollBack();
+                    return "error_actualizando_detalle";
+                }
+            }
+
+            $conexion->commit();
+            return "ok";
+        } catch (PDOException $e) {
+            if(isset($conexion)) $conexion->rollBack();
+            error_log("Error en mdlMarcarMantenimientoDetalle: " . $e->getMessage());
+            return "error";
         }
-        $stmt = null;
-
     }
 
     /*=============================================
@@ -96,9 +114,10 @@ class ModeloDevoluciones
     static public function mdlVerificarTodosEquiposDevueltos($idPrestamo){
     $stmt = Conexion::conectar()->prepare(
         "SELECT COUNT(dp.equipo_id) as total_equipos_prestamo,
-                SUM(CASE WHEN e.id_estado IN (4, 7) THEN 1 ELSE 0 END) as equipos_procesados
+                SUM(CASE WHEN est.estado IN ('Mantenimiento', 'baja') THEN 1 ELSE 0 END) as equipos_procesados
          FROM detalle_prestamo dp
          JOIN equipos e ON dp.equipo_id = e.equipo_id
+         JOIN estados est ON e.id_estado = est.id_estado
          WHERE dp.id_prestamo = :id_prestamo"
     );
 

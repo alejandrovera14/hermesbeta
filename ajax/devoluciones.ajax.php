@@ -42,8 +42,8 @@ class AjaxDevoluciones {
     /*=============================================
     MARCAR EQUIPO EN DETALLE_PRESTAMO COMO MANTENIMIENTO CON MOTIVO
     =============================================*/
-    public function ajaxMarcarMantenimientoConMotivo() {
-        $respuestaControlador = ControladorDevoluciones::ctrMarcarMantenimientoConMotivo($this->idPrestamo, $this->idEquipo, $this->motivo);
+    public function ajaxMarcarMantenimiento() {
+        $respuestaControlador = ControladorDevoluciones::ctrMarcarMantenimiento($this->idPrestamo, $this->idEquipo);
         
         // Asegurarse de que la respuesta sea consistente
         if (is_array($respuestaControlador)) {
@@ -62,11 +62,17 @@ class AjaxDevoluciones {
                     "status" => "prestamo_actualizado", 
                     "message" => "Equipo en mantenimiento y préstamo actualizado a devuelto."
                 ));
+            } else if ($respuestaControlador == "error_actualizando_prestamo") {
+                echo json_encode(array(
+                    "success" => false, 
+                    "status" => "error_prestamo", 
+                    "message" => "Error al actualizar el estado del préstamo."
+                ));
             } else {
                 echo json_encode(array(
                     "success" => false, 
                     "status" => "error_marcado", 
-                    "message" => $respuestaControlador
+                    "message" => "Error al enviar el equipoa mantenimiento."
                 ));
             }
         }
@@ -95,12 +101,35 @@ class AjaxDevoluciones {
     public function ajaxMarcarEquipoRobado() {
         $respuestaControlador = ControladorDevoluciones::ctrMarcarEquipoRobado($this->idPrestamo, $this->idEquipo);
         
-        if ($respuestaControlador == "ok") {
-            echo json_encode(array("success" => true, "status" => "equipo_marcado", "message" => "Equipo marcado como robado correctamente."));
-        } else if ($respuestaControlador == "ok_prestamo_actualizado") {
-            echo json_encode(array("success" => true, "status" => "prestamo_actualizado", "message" => "Equipo marcado como robado y préstamo actualizado."));
+        if (is_array($respuestaControlador)) {
+            echo json_encode($respuestaControlador);
         } else {
-            echo json_encode(array("success" => false, "status" => "error_marcado", "message" => "Error al marcar el equipo como robado."));
+            // Si el controlador devuelve un string simple, convertirlo a formato esperado
+            if ($respuestaControlador == "ok") {
+                echo json_encode(array(
+                    "success" => true, 
+                    "status" => "equipo_marcado", 
+                    "message" => "Equipo marcado como robado correctamente."
+                ));
+            } else if ($respuestaControlador == "ok_prestamo_actualizado") {
+                echo json_encode(array(
+                    "success" => true, 
+                    "status" => "prestamo_actualizado", 
+                    "message" => "Equipo marcado como robado y préstamo actualizado a devuelto."
+                ));
+            } else if ($respuestaControlador == "error_actualizando_prestamo") {
+                echo json_encode(array(
+                    "success" => false, 
+                    "status" => "error_prestamo", 
+                    "message" => "Error al actualizar el estado del préstamo."
+                ));
+            } else {
+                echo json_encode(array(
+                    "success" => false, 
+                    "status" => "error_marcado", 
+                    "message" => "Error al marcar el equipo como robado."
+                ));
+            }
         }
     }
 }
@@ -137,10 +166,10 @@ if(isset($_POST["accion"]) && $_POST["accion"] === "marcarEquipoRobado") {
 }
 
 // Marcar equipo para mantenimiento con motivo
-if(isset($_POST["accion"]) && $_POST["accion"] === "marcarMantenimientoConMotivo") {
+if(isset($_POST["accion"]) && $_POST["accion"] === "marcarMantenimiento") {
     $devolucion = new AjaxDevoluciones();
     $devolucion->idPrestamo = $_POST["idPrestamo"];
     $devolucion->idEquipo = $_POST["idEquipo"];
     $devolucion->motivo = $_POST["motivo"];
-    $devolucion->ajaxMarcarMantenimientoConMotivo();
+    $devolucion->ajaxMarcarMantenimiento();
 }

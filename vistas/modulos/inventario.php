@@ -416,7 +416,7 @@
         </div>
         <div class="modal-body">
           <form method="">
-            <h1>¿Sale Balatrito?</h1>
+            <h1>En desarrollo...</h1>
           </form>
         </div>
       </div>

@@ -116,7 +116,7 @@
                 <div class="col-md-7">
                     <div class="card">
 
-                        <div class="card-header">
+                        <div class="card-header bg-dark">
                             <h1 class="card-title">EQUIPOS</h1>
                         </div>
 
@@ -182,7 +182,7 @@
                                 <div class="row">
                                     <div class="col-lg-12">
                                         <table id="tblActivosSolicitar" class="table table-bordered table-striped">
-                                            <thead>
+                                            <thead class="bg-dark">
                                                 <tr>
                                                     <th>Descripción</th>
                                                     <th>Serial</th>
@@ -232,7 +232,7 @@
                 <div class="col-md-5">
                     <div class="card">
 
-                        <div class="card-header">
+                        <div class="card-header bg-dark">
                             <h1 class="card-title">SOLICITUD</h1>
                         </div>
 

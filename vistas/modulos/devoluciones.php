@@ -1,14 +1,13 @@
-    <?php
-        $item = "id_modulo";
-        $valor = 3;
-        $respuesta = ControladorModulos::ctrMostrarModulos($item, $valor);
-        if ($respuesta["estado"] == "inactivo") {
-            echo '<script>
-                window.location = "desactivado";
-            </script>';
-        }
-
-    ?>
+<?php
+    $item = "id_modulo";
+    $valor = 3;
+    $respuesta = ControladorModulos::ctrMostrarModulos($item, $valor);
+    if ($respuesta["estado"] == "inactivo") {
+        echo '<script>
+            window.location = "desactivado";
+        </script>';
+    }
+?>
 <div class="content-wrapper">
   <section class="content-header">
     <div class="container-fluid">
@@ -33,7 +32,7 @@
           <div class="card">
             <div class="card-body">
               <table id="tblDevoluciones" class="table table-bordered table-striped">
-                <thead>
+                <thead class="bg-dark">
                   <tr>
                     <th>ID</th>
                     <th>Identificación</th>
@@ -48,7 +47,6 @@
                 </thead>
                 <tbody>
                   <?php
-
                   $item = null;
                   $valor = null;
                   $devoluciones = ControladorDevoluciones::ctrMostrarDevoluciones($item, $valor);
@@ -65,12 +63,17 @@
                       <td>' . $value["fecha_fin"] . '</td>
                       <td>' . $value["tipo_prestamo"] . '</td>
                       <td>
-                        <div class="btn-group">';
-                    // Modificamos para usar una sola modal y pasar el ID del préstamo
-                    echo '<button class="btn btn-info btn-sm btnVerUsuario" data-id="' . $value["id_prestamo"] . '" data-toggle="modal" data-target="#modalVerDetallesPrestamo">
-                                    <i class="fas fa-eye"></i> Ver
-                                  </button>';
-                    echo '</div>
+                        <div class="btn-group">
+                            <button title="Consultar detalles de préstamo" class="btn btn-default btn-sm btnVerUsuario" data-id="' . $value["id_prestamo"] . '" data-toggle="modal" data-target="#modalVerDetallesPrestamo">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button title="Editar préstamo" class="btn btn-default btn-sm btnEditarPrestamo" data-id="' . $value["id_prestamo"] . '" data-toggle="modal" data-target="#modalEditarPrestamo">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button title="Solicitudes relacionadas" class="btn btn-default btn-sm btnSolicitudesPrestamo" data-id="' . $value["id_prestamo"] . '" data-toggle="modal" data-target="#modalSolicitudesPrestamo">
+                                <i class="fas fa-laptop"></i>
+                            </button>
+                        </div>
                       </td>
                     </tr>';
                   }
@@ -118,14 +121,6 @@
                         <tr>
                           <th style="width: 40%">Identificación:</th>
                           <td><span id="prestamoIdentificacion"></span></td>
-                        </tr>
-                        <tr>
-                          <th>Nombre:</th>
-                          <td><span id="prestamoNombre"></span></td>
-                        </tr>
-                        <tr>
-                          <th>Apellido:</th>
-                          <td><span id="prestamoApellido"></span></td>
                         </tr>
                         <tr>
                           <th>Teléfono:</th>

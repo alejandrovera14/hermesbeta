@@ -1,14 +1,3 @@
-    <?php
-        $item = "id_modulo";
-        $valor = 6;
-        $respuesta = ControladorModulos::ctrMostrarModulos($item, $valor);
-        if ($respuesta["estado"] == "inactivo") {
-            echo '<script>
-                window.location = "desactivado";
-            </script>';
-        }
-
-    ?>
 <div class="wrapper">
   <div class="content-wrapper">
     <section class="content-header">
@@ -49,13 +38,13 @@
               $item = null;
               $valor = null;
               $prestamos = ControladorSolicitudes::ctrMostrarPrestamo($item, $valor);
-              // var_dump($prestamos[0]);
+              
               foreach ($prestamos as $key => $value) {
                 if ($value["tipo_prestamo"] == "Reservado") {
                   $item = "id_prestamo";
                   $valor = $value["id_prestamo"];
                   $autorizaciones = ControladorAutorizaciones::ctrMostrarAutorizaciones($item, $valor);
-                  // var_dump($autorizaciones);
+                  
                   echo '<tr>
                           <td>' . $value["id_prestamo"] . '</td>
                           <td>' . $value["solicitante"] . '</td>
@@ -95,27 +84,31 @@
                   echo '</div>
                           </td>
                           <td>
-                            <button class="btn btn-info btn-sm btnVerDetallePrestamo_Autorizar" idPrestamo="' . $value["id_prestamo"] . '" title="Detalles del Prestamo" data-toggle="modal" data-target="#modalVerDetallesPrestamo">
-                              <i class="fas fa-eye"></i>
-                            </button>
+                            <div class="btn-group">
+                              <button title="Consultar detalles de préstamo" class="btn btn-default btnVerDetallePrestamo_Autorizar" idPrestamo="' . $value["id_prestamo"] . '" data-toggle="modal" data-target="#modalVerDetallesPrestamo">
+                                <i class="fas fa-eye"></i>
+                              </button>
+                              <button title="Editar préstamo" class="btn btn-default btnEditarPrestamo" idPrestamo="' . $value["id_prestamo"] . '" data-toggle="modal" data-target="#modalEditarPrestamo">
+                                <i class="fas fa-edit"></i>
+                              </button>
+                              <button title="Solicitudes relacionadas" class="btn btn-default btnSolicitudesPrestamo" idPrestamo="' . $value["id_prestamo"] . '" data-toggle="modal" data-target="#modalSolicitudesPrestamo">
+                                <i class="fas fa-laptop"></i>
+                              </button>
+                            </div>
                           </td>
                         </tr>';
-                } //fin REservado
-
+                }
               }
               ?>
             </tbody>
           </table>
         </div>
       </div>
-
-
     </section>
   </div>
 </div>
 
-
-
+<!-- Modal para ver detalles del préstamo -->
 <div class="modal fade" id="modalVerDetallesPrestamo">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
@@ -129,7 +122,6 @@
         <div class="row">
           <div class="col-md-12">
             <dl class="row">
-
               <dt class="col-sm-4">Estado:</dt>
               <dd class="col-sm-8" id="detalleTipoPrestamo"></dd>
 
@@ -149,7 +141,7 @@
                 <h5 class="card-title">Equipos Solicitados</h5>
               </div>
               <div class="card-body p-10">
-                <table class="table table-bordered table-striped " id="tblDetallePrestamo">
+                <table class="table table-bordered table-striped" id="tblDetallePrestamo">
                   <thead>
                     <tr>
                       <th>ID</th>
@@ -161,7 +153,6 @@
                     </tr>
                   </thead>
                   <tbody>
-
                     <!-- Aquí se cargarán los detalles del préstamo -->
                   </tbody>
                 </table>
@@ -182,14 +173,12 @@
         <button type="button" class="btn btn-danger btnRechazar btnAccionFirma d-none" data-toggle="modal" data-target="#modalMotivoRechazo">Rechazar</button>
         <button type="button" class="btn btn-primary btnAutorizar btnAccionFirma d-none">Autorizar</button>
         <button type="button" class="btn btn-danger btnDesautorizar d-none">Desautorizar</button>
-
-
       </div>
     </div>
   </div>
 </div>
 
-<!-- creamos la modal del motivo de rechazo -->
+<!-- Modal para motivo de rechazo -->
 <div class="modal fade" id="modalMotivoRechazo">
   <div class="modal-dialog">
     <div class="modal-content">

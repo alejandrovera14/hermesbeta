@@ -1,13 +1,8 @@
-<head>
+<!-- <head>
 
     <script>
-        const usuarioActual = {
-            id: "<?php echo $_SESSION['id_usuario']; ?>",
-            cedula: "<?php echo $_SESSION['numero_documento']; ?>",
-             permisos: <?php echo json_encode($_SESSION['permisos']); ?>
-        };
     </script>
-</head>
+</head> -->
 
 
 <!-- Content Wrapper. Contains page content -->

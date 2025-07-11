@@ -1,17 +1,21 @@
 
-# 📋 Módulo de Auditoría de Usuarios
+📋 Módulo de Auditoría de Usuarios
 
 Este módulo permite llevar un historial detallado de los cambios realizados sobre los usuarios en el sistema. Utiliza arquitectura MVC, MySQL, AJAX y DataTables con modo server-side para una visualización eficiente.
 
-# LEER IMPORTANTE 
-Esto va de la mano de usuarios ya que lo que esta aqui funciona con un disparador creado en la tabla de usuarios, que envia datos a otra tabla auditoria_usuarios y que contiene una vista para asi auditoria convertirse en serveride. todo esto en la base de datos Mysql .
+⚠️ Nota importante
 
-## 🧩 Funcionalidades
+Este módulo trabaja en conjunto con el módulo de Usuarios, ya que los registros se generan automáticamente mediante triggers (disparadores) definidos en las tablas usuarios, fichas, sedes y roles. Todos los cambios se almacenan en la tabla auditoria_usuarios, la cual es visualizada a través de la vista vista_auditoria para alimentar el servidor en modo server-side en MySQL.
 
-- Registro automático de cambios en campos clave del usuario (ej. nombre, correo, estado, género, etc.)
-- Visualización de la auditoría en una tabla dinámica con DataTables.
-- Modal para ver detalles del cambio (campo, valor anterior, valor nuevo).
-- Filtros por búsqueda, orden cronológico y exportación CSV/Excel.
+🧩 Funcionalidades
+
+- Registro automático de cambios en campos clave del usuario (ej. nombre, correo, estado, género, etc.).
+
+- Visualización en tabla dinámica utilizando DataTables.
+
+- Modal de detalles con información del campo modificado, valor anterior y valor nuevo.
+
+- Búsqueda, orden cronológico, y exportación a CSV/Excel.
 
 ## 🛠️ Componentes Técnicos
 
@@ -194,4 +198,133 @@ BEGIN
 END$$
 
 DELIMITER ;
+```
+
+
+### 3. Crear el trigger `trg_auditar_sedes` que registra los cambios en la tabla `sedes`
+```sql
+DELIMITER $$
+
+CREATE TRIGGER trg_auditar_sedes
+AFTER UPDATE ON sedes
+FOR EACH ROW
+BEGIN
+  DECLARE cambios TEXT DEFAULT '';
+  DECLARE cambios_anterior TEXT DEFAULT '';
+  DECLARE campos TEXT DEFAULT '';
+  DECLARE separador VARCHAR(3) DEFAULT '';
+
+  IF NOT (OLD.nombre_sede <=> NEW.nombre_sede) THEN
+    SET cambios = CONCAT(cambios, separador, NEW.nombre_sede);
+    SET cambios_anterior = CONCAT(cambios_anterior, separador, OLD.nombre_sede);
+    SET campos = CONCAT(campos, separador, 'nombre_sede');
+    SET separador = '; ';
+  END IF;
+
+  IF cambios <> '' THEN
+    INSERT INTO auditoria_usuarios (
+      id_usuario_afectado,
+      id_usuario_editor,
+      campo_modificado,
+      valor_anterior,
+      valor_nuevo,
+      fecha_cambio
+    ) VALUES (
+      OLD.id_sede,
+      @id_usuario_editor,
+      campos,
+      cambios_anterior,
+      cambios,
+      NOW()
+    );
+  END IF;
+END$$
+
+DELIMITER ;
+```
+
+
+### 4. Crear el trigger `trg_auditar_roles` que registra los cambios en la tabla `roles`
+```sql
+DELIMITER $$
+
+CREATE TRIGGER trg_auditar_roles
+AFTER UPDATE ON roles
+FOR EACH ROW
+BEGIN
+  DECLARE cambios TEXT DEFAULT '';
+  DECLARE cambios_anterior TEXT DEFAULT '';
+  DECLARE campos TEXT DEFAULT '';
+  DECLARE separador VARCHAR(3) DEFAULT '';
+
+  IF NOT (OLD.nombre_rol <=> NEW.nombre_rol) THEN
+    SET cambios = CONCAT(cambios, separador, NEW.nombre_rol);
+    SET cambios_anterior = CONCAT(cambios_anterior, separador, OLD.nombre_rol);
+    SET campos = CONCAT(campos, separador, 'nombre_rol');
+    SET separador = '; ';
+  END IF;
+
+  IF cambios <> '' THEN
+    INSERT INTO auditoria_usuarios (
+      id_usuario_afectado,
+      id_usuario_editor,
+      campo_modificado,
+      valor_anterior,
+      valor_nuevo,
+      fecha_cambio
+    ) VALUES (
+      OLD.id_rol,
+      @id_usuario_editor,
+      campos,
+      cambios_anterior,
+      cambios,
+      NOW()
+    );
+  END IF;
+END$$
+
+DELIMITER ;
+
+```
+### 5. Crear el trigger `trg_auditar_fichas` que registra los cambios en la tabla `fichas`
+```sql
+DELIMITER $$
+
+CREATE TRIGGER trg_auditar_fichas
+AFTER UPDATE ON fichas
+FOR EACH ROW
+BEGIN
+  DECLARE cambios TEXT DEFAULT '';
+  DECLARE cambios_anterior TEXT DEFAULT '';
+  DECLARE campos TEXT DEFAULT '';
+  DECLARE separador VARCHAR(3) DEFAULT '';
+
+  IF NOT (OLD.descripcion <=> NEW.descripcion) THEN
+    SET cambios = CONCAT(cambios, separador, NEW.descripcion);
+    SET cambios_anterior = CONCAT(cambios_anterior, separador, OLD.descripcion);
+    SET campos = CONCAT(campos, separador, 'descripcion');
+    SET separador = '; ';
+  END IF;
+
+  IF cambios <> '' THEN
+    INSERT INTO auditoria_usuarios (
+      id_usuario_afectado,
+      id_usuario_editor,
+      campo_modificado,
+      valor_anterior,
+      valor_nuevo,
+      fecha_cambio
+    ) VALUES (
+      OLD.id_ficha,
+      @id_usuario_editor,
+      campos,
+      cambios_anterior,
+      cambios,
+      NOW()
+    );
+  END IF;
+END$$
+
+DELIMITER ;
+
 ```

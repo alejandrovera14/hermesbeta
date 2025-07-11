@@ -755,6 +755,7 @@ $(document).on("click", ".btnEditarUsuario", function() {
             $("#editTipoDocumento").html(respuesta["tipo_documento"]);
             $("#editNumeroDocumento").val(respuesta["numero_documento"]);
             $("#rolOriginal").val(respuesta["id_rol"]);
+            $("#fichaOriginal").val(respuesta["id_ficha"]);
             $("#EditRolUsuario").val(respuesta["id_rol"]);
             $("#EditRolUsuario").html(respuesta["nombre_rol"]);
 
@@ -776,6 +777,9 @@ $(document).on("click", ".btnEditarUsuario", function() {
             //$("#selectEditSede").trigger("change");
             //disparar el evento change para cargar las fichas de la sede seleccionada
             // $("#selectEditSede").trigger("change");
+            $("#optionEditIdFicha").val(respuesta["id_ficha"]);
+            $("#optionEditIdFicha").html(respuesta["codigo"]);
+            $("#fichaOriginal").val(respuesta["id_ficha"]); // 
 
             $("#optionEditIdFicha").val(respuesta["id_ficha"]);
             $("#optionEditIdFicha").html(respuesta["codigo"]);

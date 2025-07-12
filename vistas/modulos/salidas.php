@@ -141,7 +141,7 @@
                             </div>
                             <div class="card-body p-10">
                                 <table class="table table-bordered table-striped " id="tblDetallePrestamo">
-                                    <thead>
+                                    <thead class="bg-dark">
                                         <tr>
                                             <th>ID</th>
                                             <th>Categoría</th>

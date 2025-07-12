@@ -32,7 +32,7 @@ $(document).ready(function() {
                     // Información de los equipos en una tabla
                     var equiposTableHtml = `
                         <table class="table table-bordered table-striped dt-responsive tablaDevolucionesEquipos" width="100%">
-                            <thead>
+                            <thead class="bg-dark">
                                 <tr>
                                     <th>Categoría</th>
                                     <th>Marca</th>
@@ -127,12 +127,10 @@ $(document).ready(function() {
                 dataType: "json",
                 success: function(respuesta) {
                     if (respuesta && respuesta.success) { 
-                        Swal.fire({
+                        Toast.fire({
                             icon: "success",
                             title: respuesta.title || "¡Acción completada!",
-                            text: respuesta.message,
-                            showConfirmButton: false,
-                            timer: 2000
+                            text: respuesta.message
                         }).then(() => {
                             $buttonPressed.closest('tr').fadeOut(500, function() {
                                 $(this).remove();
@@ -233,12 +231,10 @@ $(document).ready(function() {
                 dataType: "json",
                 success: function(respuesta) {
                     if (respuesta && respuesta.success) {
-                        Swal.fire({
+                        Toast.fire({
                             icon: "success",
                             title: respuesta.title || "¡Acción completada!",
-                            text: respuesta.message,
-                            showConfirmButton: false,
-                            timer: 2000
+                            text: respuesta.message
                         }).then(() => {
                             $buttonPressed.closest('tr').fadeOut(500, function() {
                                 $(this).remove();

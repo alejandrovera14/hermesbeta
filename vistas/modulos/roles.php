@@ -34,7 +34,7 @@
                     <div class="card">
                         <div class="card-body">
                             <table id="tblRoles" class="table table-bordered table-striped">
-                                <thead>
+                                <thead class="bg-dark">
                                     <tr>
                                         <th>Rol</th>
                                         <th>Nombre</th>

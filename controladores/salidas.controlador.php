@@ -56,4 +56,11 @@ class Controladorsalidas
             }
         }
     }
+
+    static public function ctrContarSalidas($estado)
+    {
+        $tabla = "prestamos";
+        $respuesta = Modelosalida::mdlContarSalidas($tabla, $estado);
+        return $respuesta;
+    }
 }

@@ -38,20 +38,20 @@
               $item = null;
               $valor = null;
               $prestamos = ControladorSolicitudes::ctrMostrarPrestamo($item, $valor);
-              
               foreach ($prestamos as $key => $value) {
-                if ($value["tipo_prestamo"] == "Reservado") {
+                if ($value["tipo_prestamo"] == "Reservado" && $value["estado_prestamo"] != "Prestado" && $value["estado_prestamo"] != "Devuelto") {
                   $item = "id_prestamo";
                   $valor = $value["id_prestamo"];
                   $autorizaciones = ControladorAutorizaciones::ctrMostrarAutorizaciones($item, $valor);
-                  
+                  // var_dump($autorizaciones);
+
                   echo '<tr>
                           <td>' . $value["id_prestamo"] . '</td>
                           <td>' . $value["solicitante"] . '</td>
                           <td>' . date('Y-m-d H:i', strtotime($value["fecha_inicio"])) . '</td>
                           <td>' . date('Y-m-d H:i', strtotime($value["fecha_fin"])) . '</td>';
                   if ($value["estado_prestamo"] == "Rechazado") {
-                    echo '<td class="bg-danger">' . $value["estado_prestamo"] . '</td>';
+                    echo '<td> <p class="text-danger" title="Rechazado por ' . $autorizaciones["usuario_que_rechazo"] . '"> ' . $value["estado_prestamo"] . '</p></td>';
                   } else {
                     echo '<td>' . $value["estado_prestamo"] . '</td>';
                   };
@@ -59,27 +59,27 @@
                           <td>
                             <div class="icheck-primary d-inline mx-1">';
                   if ($autorizaciones["firma_coordinacion"] == "Firmado") {
-                    echo '<input type="checkbox" checked disabled>';
+                    echo '<input type="checkbox" checked disabled title="Aprobado por ' . $autorizaciones["nombre_usuario_coordinacion"] . '">';
                   } else {
-                    echo '<input type="checkbox" disabled>';
+                    echo '<input type="checkbox" disabled title="En trámite...">';
                   }
                   echo '</div>
                           </td>
                           <td>
                             <div class="icheck-primary d-inline mx-1">';
                   if ($autorizaciones["firma_lider_tic"] == "Firmado") {
-                    echo '<input type="checkbox" checked disabled>';
+                    echo '<input type="checkbox" checked disabled title="Aprobado por ' . $autorizaciones["nombre_usuario_lider_tic"] . '">';
                   } else {
-                    echo '<input type="checkbox" disabled>';
+                    echo '<input type="checkbox" disabled title="En trámite...">';
                   }
                   echo '</div>
                           </td>
                           <td>
                             <div class="icheck-primary d-inline mx-1">';
                   if ($autorizaciones["firma_almacen"] == "Firmado") {
-                    echo '<input type="checkbox" checked disabled>';
+                    echo '<input type="checkbox" checked disabled title="Aprobado por ' . $autorizaciones["nombre_usuario_almacen"] . '">';
                   } else {
-                    echo '<input type="checkbox" disabled>';
+                    echo '<input type="checkbox" disabled title="En trámite...">';
                   }
                   echo '</div>
                           </td>
@@ -87,13 +87,7 @@
                             <div class="btn-group">
                               <button title="Consultar detalles de préstamo" class="btn btn-default btnVerDetallePrestamo_Autorizar" idPrestamo="' . $value["id_prestamo"] . '" data-toggle="modal" data-target="#modalVerDetallesPrestamo">
                                 <i class="fas fa-eye"></i>
-                              </button>
-                              <button title="Editar préstamo" class="btn btn-default btnEditarPrestamo" idPrestamo="' . $value["id_prestamo"] . '" data-toggle="modal" data-target="#modalEditarPrestamo">
-                                <i class="fas fa-edit"></i>
-                              </button>
-                              <button title="Solicitudes relacionadas" class="btn btn-default btnSolicitudesPrestamo" idPrestamo="' . $value["id_prestamo"] . '" data-toggle="modal" data-target="#modalSolicitudesPrestamo">
-                                <i class="fas fa-laptop"></i>
-                              </button>
+                              </button>   
                             </div>
                           </td>
                         </tr>';
@@ -109,58 +103,146 @@
 </div>
 
 <!-- Modal para ver detalles del préstamo -->
-<div class="modal fade" id="modalVerDetallesPrestamo">
-  <div class="modal-dialog modal-lg">
+<div class="modal fade" id="modalVerDetallesPrestamo" tabindex="-1" role="dialog" aria-labelledby="modalVerUsuarioLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl" role="document">
     <div class="modal-content">
-      <div class="modal-header bg-primary">
-        <h4 class="modal-title">Detalle del Préstamo #<span id="numeroPrestamo"></span></h4>
+
+      <div class="modal-header bg-info">
+        <h5 class="modal-title">Detalle del Préstamo #<span id="numeroPrestamo"></span></h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
+
       <div class="modal-body">
+
         <div class="row">
-          <div class="col-md-12">
-            <dl class="row">
-              <dt class="col-sm-4">Estado:</dt>
-              <dd class="col-sm-8" id="detalleTipoPrestamo"></dd>
 
-              <dt class="col-sm-4">Fecha Préstamo:</dt>
-              <dd class="col-sm-8" id="detalleFechaInicio"></dd>
-
-              <dt class="col-sm-4">Fecha Devolución:</dt>
-              <dd class="col-sm-8" id="detalleFechaFin"></dd>
-
-              <dt class="col-sm-4">Motivo:</dt>
-              <dd class="col-sm-8" id="detalleMotivoPrestamo"></dd>
-            </dl>
+          <!-- Información del Usuario -->
+          <div class="col-md-3 text-center">
+            <div class="user-avatar">
+              <img class="img-circle elevation-2 mb-3" id="imgUsuario" src="vistas/img/usuarios/default/anonymous.png" alt="User Image" style="width: 120px; height: 120px;">
+            </div>
+            <h5 class="mb-1" id="usuarioNombre">Nombre del solicitante</h5>
+            <p class="text-muted" id="userRol">Aprendiz</p>
           </div>
-          <div class="col-md-12">
-            <div class="card">
-              <div class="card-header">
-                <h5 class="card-title">Equipos Solicitados</h5>
+
+          <!-- Informacion de usuario y prestamo -->
+          <div class="col-md-9 col-sm-12">
+            <div class="row">
+
+              <div class="col-lg-4 col-md-6 col-sm-12">
+                <div class="info-box">
+                  <span class="info-box-icon bg-info"><i class="fas fa-id-card"></i></span>
+                  <div class="info-box-content">
+                    <span class="info-box-text">Identificación</span>
+                    <span class="info-box-number" id="usuarioIdentificacion">Identificación</span>
+                  </div>
+                </div>
               </div>
-              <div class="card-body p-10">
-                <table class="table table-bordered table-striped" id="tblDetallePrestamo">
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Categoría</th>
-                      <th>Equipo</th>
-                      <th>etiqueta</th>
-                      <th>Serial</th>
-                      <th>Ubicación</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <!-- Aquí se cargarán los detalles del préstamo -->
-                  </tbody>
-                </table>
+
+              <div class="col-lg-4 col-md-6 col-sm-12">
+                <div class="info-box">
+                  <span class="info-box-icon bg-info"><i class="fas fa-phone"></i></span>
+                  <div class="info-box-content">
+                    <span class="info-box-text">Teléfono</span>
+                    <span class="info-box-number" id="usuarioTelefono">000000</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-lg-4 col-md-6 col-sm-12">
+                <div class="info-box">
+                  <span class="info-box-icon bg-info"><i class="fas fa-graduation-cap"></i></span>
+                  <div class="info-box-content">
+                    <span class="info-box-text">Ficha</span>
+                    <span class="info-box-number" id="usuarioFicha">2847523</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-lg-4 col-md-6 col-sm-12">
+                <div class="info-box">
+                  <span class="info-box-icon bg-info"><i class="fas fa-comment"></i></span>
+                  <div class="info-box-content">
+                    <span class="info-box-text">Motivo</span>
+                    <span class="info-box-number" id="detalleMotivoPrestamo">aaaa</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-lg-4 col-md-6 col-sm-12">
+                <div class="info-box">
+                  <span class="info-box-icon bg-info"><i class="fas fa-calendar-alt"></i></span>
+                  <div class="info-box-content">
+                    <span class="info-box-text">Fecha Inicio</span>
+                    <span class="info-box-number" id="detalleFechaInicio">2025-06-27</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-lg-4 col-md-6 col-sm-12">
+                <div class="info-box">
+                  <span class="info-box-icon bg-info"><i class="fas fa-calendar-check"></i></span>
+                  <div class="info-box-content">
+                    <span class="info-box-text">Fecha Devolución</span>
+                    <span class="info-box-number" id="detalleFechaFin">2025-07-05</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+            <!-- row  -->
+
+            <!-- Estado -->
+            <div class="row">
+              <div class="col-12">
+                <div class="callout callout-success">
+                  <h5><i class="fas fa-check"></i> Estado:</h5>
+                  <span class="badge badge-success badge-lg" id="estadoPrestamo">Autorizado</span>
+                </div>
               </div>
             </div>
+
+          </div>
+          <!-- Cierra informacion de usuario y prestamo -->
+
+        </div>
+        <!-- row  -->
+
+
+
+        <!-- Detalles de los equipos -->
+
+        <div class="card">
+          <div class="card-header">
+            <h5 class="card-title">Equipos Solicitados</h5>
+          </div>
+          <div class="card-body">
+            <table class="table table-bordered table-striped" id="tblDetallePrestamo" style="width:100%">
+              <thead class="bg-dark">
+                <tr>
+                  <th>ID</th>
+                  <th>Categoría</th>
+                  <th>Equipo</th>
+                  <th>etiqueta</th>
+                  <th>Serial</th>
+                  <th>Ubicación</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Aquí se cargarán los detalles del préstamo -->
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
+      <!-- modal body -->
+
+
+
+
+
       <div class="modal-footer">
         <input type="hidden" id="idRolSesion" value="<?php echo $_SESSION['rol'] ?>">
         <input type="hidden" id="nombre_rolSesion" value="<?php echo $_SESSION['nombre_rol'] ?>">
@@ -178,35 +260,36 @@
   </div>
 </div>
 
-<!-- Modal para motivo de rechazo -->
-<div class="modal fade" id="modalMotivoRechazo">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header bg-danger">
-        <h4 class="modal-title">Motivo de Rechazo</h4>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <form action="" method="post">
-        <input type="hidden" id="numeroPrestamoRechazar" name="numeroPrestamoRechazar">
-        <input type="hidden" id="idUsuarioRechazar" name="idUsuarioRechazar" value="<?php echo $_SESSION['id_usuario'] ?>">
-        <input type="hidden" id="idRolRechazar" name="idRolRechazar" value="<?php echo $_SESSION['rol'] ?>">
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="motivoRechazo">Motivo de Rechazo:</label>
-            <textarea class="form-control" id="motivoRechazo" rows="4" name="motivoRechazoAutorizacion" required></textarea>
+
+  <!-- Modal para motivo de rechazo -->
+  <div class="modal fade" id="modalMotivoRechazo">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-danger">
+          <h4 class="modal-title">Motivo de Rechazo</h4>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form action="" method="post">
+          <input type="hidden" id="numeroPrestamoRechazar" name="numeroPrestamoRechazar">
+          <input type="hidden" id="idUsuarioRechazar" name="idUsuarioRechazar" value="<?php echo $_SESSION['id_usuario'] ?>">
+          <input type="hidden" id="idRolRechazar" name="idRolRechazar" value="<?php echo $_SESSION['rol'] ?>">
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="motivoRechazo">Motivo de Rechazo:</label>
+              <textarea class="form-control" id="motivoRechazo" rows="4" name="motivoRechazoAutorizacion" required></textarea>
+            </div>
           </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
-          <button type="submit" class="btn btn-danger btnRechazarConfirmar">Rechazar</button>
-        </div>
-        <?php
-        $rechazar = new ControladorAutorizaciones();
-        $rechazar->ctrRechazarPrestamo();
-        ?>
-      </form>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+            <button type="submit" class="btn btn-danger btnRechazarConfirmar">Rechazar</button>
+          </div>
+          <?php
+          $rechazar = new ControladorAutorizaciones();
+          $rechazar->ctrRechazarPrestamo();
+          ?>
+        </form>
+      </div>
     </div>
   </div>
-</div>

@@ -33,7 +33,11 @@ session_start();
   <link rel="stylesheet" href="vistas/dist/css/adminlte.css">
   <!-- mi css -->
   <link rel="stylesheet" href="vistas/css/plantilla.css">
+  <!-- summernote -->
+  <link rel="stylesheet" href="vistas/plugins/summernote/summernote-bs4.min.css">
 
+  <!-- Toastr -->
+  <link rel="stylesheet" href="vistas/plugins/toastr/toastr.min.css">
   <!-- ================================================================================================== -->
 
   <!-- jQuery -->
@@ -54,6 +58,10 @@ session_start();
   <script src="vistas/plugins/datatables-buttons/js/buttons.html5.min.js"></script>
   <script src="vistas/plugins/datatables-buttons/js/buttons.print.min.js"></script>
   <script src="vistas/plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
+  <!-- Summernote -->
+  <script src="vistas/plugins/summernote/summernote-bs4.min.js"></script>
+  <!-- Toastr -->
+  <script src="vistas/plugins/toastr/toastr.min.js"></script>
   <!-- InputMask -->
   <script src="vistas/plugins/moment/moment.min.js"></script>
   <script src="vistas/plugins/inputmask/jquery.inputmask.min.js"></script>
@@ -67,8 +75,21 @@ session_start();
 
   <!-- AdminLTE App -->
   <script src="vistas/dist/js/adminlte.min.js"></script>
-  <!-- AdminLTE for demo purposes -->
-  <!-- <script src="vistas/dist/js/demo.js"></script>   -->
+  
+
+  <!-- CSS para evitar FOUC (Flash of Unstyled Content) -->
+  <style>
+    body {
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    body.loaded {
+      visibility: visible;
+      opacity: 1;
+    }
+  </style>
 
 </head>
 
@@ -86,9 +107,9 @@ session_start();
 
     echo '<script>
         const usuarioActual = {
-            id: '.$_SESSION['id_usuario'].',
-            cedula: '.$_SESSION['numero_documento'].',
-            permisos: '.json_encode($_SESSION['permisos']).'  
+            id: ' . $_SESSION['id_usuario'] . ',
+            cedula: ' . $_SESSION['numero_documento'] . ',
+            permisos: ' . json_encode($_SESSION['permisos']) . '  
         }
     </script>';
 
@@ -118,6 +139,8 @@ session_start();
         $_GET["ruta"] == "reporte-equipos" ||
         $_GET["ruta"] == "desactivado" ||
         $_GET["ruta"] == "auditoria" ||
+        $_GET["ruta"] == "notificaciones" ||
+        $_GET["ruta"] == "redactar" ||
         $_GET["ruta"] == "salir"
       ) {
 
@@ -134,6 +157,8 @@ session_start();
   }
   ?>
 
+
+
   <script src="vistas/js/plantilla.js"></script>
   <script src="vistas/js/sedes.js"></script>
   <script src="vistas/js/fichas.js"></script>
@@ -146,9 +171,19 @@ session_start();
   <script src="vistas/js/equipos.js"></script>
   <script src="vistas/js/consultar-solicitudes.js"></script>
   <script src="vistas/js/devoluciones.js"></script>
-  <script src="vistas/js/auditoria.js"></script>
+  <!-- <script src="vistas/js/auditoria.js"></script> -->
   <script src="vistas/js/salidas.js"></script>
   <script src="vistas/js/mis-solicitudes.js"></script>
+  <script src="vistas/js/mantenimiento.js"></script>
+  <script src="vistas/js/notificaciones.js"></script>
+
+  <!-- JS para evitar FOUC (Flash of Unstyled Content) -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      document.body.classList.add('loaded');
+    });
+  </script>
+
 
 </body>
 

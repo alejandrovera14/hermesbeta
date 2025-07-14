@@ -3,6 +3,12 @@
 // Requerimos los controladores y modelos necesarios para manipular los datos
 require_once "../controladores/equipos.controlador.php";
 require_once "../modelos/equipos.modelo.php";
+require_once "../modelos/categorias.modelo.php";
+require_once "../vendor/autoload.php";
+require_once "../modelos/ubicaciones.modelo.php";
+
+use PhpOffice\PhpSpreadsheet\IOFactory;
+
 
 class AjaxEquipos {
     
@@ -52,6 +58,12 @@ class AjaxEquipos {
         $respuesta = ControladorEquipos::ctrMostrarUbicacion($item, $valor);
         echo json_encode($respuesta);
     }
+    public function ajaxImportarEquiposMasivo() {
+    header('Content-Type: application/json; charset=utf-8');
+    $respuesta = ControladorEquipos::ctrImportarEquiposMasivo();
+    echo $respuesta;
+    exit;
+  }
 
     // public function ajaxMostrarDatosUbicacionDestino(){
     //     $item = "ubicacion_id";
@@ -66,6 +78,11 @@ class AjaxEquipos {
 /* ==================================================
 EJECUCIÓN DEL CÓDIGO CUANDO SE ENVÍA EL FORMULARIO
 ================================================== */
+if(isset($_POST["accion"]) && $_POST["accion"] == "importarEquiposMasivo"){
+    $importar = new AjaxEquipos();
+    $importar->ajaxImportarEquiposMasivo();
+}
+
 
 if (isset($_POST["idEquipoTraspasoUbicacion"])) {
     $traspaso = new AjaxEquipos();

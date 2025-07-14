@@ -32,7 +32,7 @@ $(document).ready(function() {
                     // Información de los equipos en una tabla
                     var equiposTableHtml = `
                         <table class="table table-bordered table-striped dt-responsive tablaDevolucionesEquipos" width="100%">
-                            <thead>
+                            <thead class="bg-dark">
                                 <tr>
                                     <th>Categoría</th>
                                     <th>Marca</th>
@@ -57,8 +57,8 @@ $(document).ready(function() {
                                 <button type="button" class="btn btn-success btn-sm btn-devolver-equipo mr-1" data-prestamo-id="${datosPrestamo.id_prestamo}" data-equipo-id="${equipo.equipo_id}" data-estado="buen_estado">
                                     <i class="fas fa-check-circle"></i> B. Estado
                                 </button>
-                                <button type="button" class="btn btn-danger btn-sm btn-devolver-equipo" data-prestamo-id="${datosPrestamo.id_prestamo}" data-equipo-id="${equipo.equipo_id}" data-estado="mal_estado">
-                                    <i class="fas fa-times-circle"></i> M. Estado
+                                <button type="button" class="btn btn-danger btn-sm btn-devolver-equipo" data-prestamo-id="${datosPrestamo.id_prestamo}" data-equipo-id="${equipo.equipo_id}" data-estado="devuelto">
+                                    <i class="fas fa-undo-alt"></i> M. Estado
                                 </button>
                             `;
                         } else if (datosPrestamo.tipo_prestamo === 'Reservado') {
@@ -105,31 +105,32 @@ $(document).ready(function() {
 
         console.log("Botón de devolución clickeado - Préstamo:", prestamoId, "Equipo:", equipoId, "Estado:", estado);
 
-        // 1. Caso para "Mal Estado" (abre modal)
-        if (estado === 'mal_estado') {
-            $('#malEstadoPrestamoId').val(prestamoId);
-            $('#malEstadoEquipoId').val(equipoId);
-            $('#modalMalEstado').modal('show');
-        } 
-        // 2. Caso para "Devolver" (Reservado -> Mantenimiento)
-        else if (estado === 'devuelto') {
+        // Casos para "Mal Estado", "Buen Estado", "Devolver" y "Robado"
+        if (estado === 'mal_estado' || estado === 'devuelto' || estado === 'buen_estado' || estado === 'robado') {
+            var accionAjax;
+            if (estado === 'mal_estado' || estado === 'devuelto') {
+                accionAjax = 'marcarMantenimientoDetalle';
+            } else if (estado === 'buen_estado') {
+                accionAjax = 'marcarBuenEstado';
+            } else if (estado === 'robado') {
+                accionAjax = 'marcarEquipoRobado';
+            }
+
             $.ajax({
                 url: "ajax/devoluciones.ajax.php", 
                 method: "POST",
                 data: {
-                    accion: "marcarMantenimientoDetalle", 
+                    accion: accionAjax, 
                     idPrestamo: prestamoId,
                     idEquipo: equipoId
                 },
                 dataType: "json",
                 success: function(respuesta) {
-                    console.log(respuesta.title);
-                    if (respuesta && respuesta.success) {
+                    if (respuesta && respuesta.success) { 
                         Toast.fire({
-                            icon: 'success',
-                            title: '¡Acción completada!',
-                            text: respuesta.message,
-                            position: "top-end"
+                            icon: "success",
+                            title: respuesta.title || "¡Acción completada!",
+                            text: respuesta.message
                         }).then(() => {
                             $buttonPressed.closest('tr').fadeOut(500, function() {
                                 $(this).remove();
@@ -230,152 +231,104 @@ $(document).ready(function() {
                 dataType: "json",
                 success: function(respuesta) {
                     if (respuesta && respuesta.success) {
-                        Swal.fire({
+                        Toast.fire({
                             icon: "success",
                             title: respuesta.title || "¡Acción completada!",
-                            text: respuesta.message,
-                            showConfirmButton: false,
-                            timer: 2000
+                            text: respuesta.message
                         }).then(() => {
                             $buttonPressed.closest('tr').fadeOut(500, function() {
                                 $(this).remove();
                                 if ($('#equiposListContainer tbody tr').length === 0) {
                                     $('#equiposListContainer').html('<p class="text-center">Todos los equipos de este préstamo han sido procesados.</p>');
-                                    if (respuesta.status === "ok_prestamo_actualizado") {
+                                    setTimeout(function(){
                                         $('#modalVerDetallesPrestamo').modal('hide');
-                                        if (typeof tablaDevoluciones !== 'undefined') {
-                                            tablaDevoluciones.ajax.reload();
-                                        } else {
-                                            window.location.reload();
-                                        }
-                                    }
+                                    }, 500); // Espera 0.5 segundos antes de cerrar el modal
                                 }
                             });
+
+                            // Si el préstamo se ha actualizado completamente, recargar la tabla principal
+                            if (respuesta.status === "prestamo_actualizado") {
+                                if (typeof tablaDevoluciones !== 'undefined') {
+                                    tablaDevoluciones.ajax.reload();
+                                } else {
+                                    // Fallback por si la instancia de datatable no está disponible
+                                    window.location.reload(); 
+                                }
+                            }
                         });
                     } else {
                         Swal.fire({
                             icon: "error",
-                            title: "Error al marcar como robado",
-                            text: (respuesta && respuesta.message) || "Hubo un problema al procesar la solicitud."
+                            title: "Error",
+                            text: respuesta.message || "Ocurrió un error al procesar la solicitud."
                         });
                     }
                 },
-                error: function(xhr, status, error) {
-                    console.error("Error en la petición AJAX:", error);
+                error: function() {
                     Swal.fire({
                         icon: "error",
                         title: "Error de comunicación",
-                        text: "No se pudo comunicar con el servidor."
+                        text: "No se pudo conectar con el servidor."
                     });
                 }
             });
-        }
+        } 
     });
 
-    // Evento para el botón "Guardar Motivo y Enviar a Mantenimiento" (VERSIÓN MEJORADA)
-    $(document).on('click', '#btnGuardarMalEstado', function() {
-        var prestamoId = $('#malEstadoPrestamoId').val();
-        var equipoId = $('#malEstadoEquipoId').val();
-        var motivo = $('#motivoMalEstado').val().trim();
-        
-        // Validación del motivo
-        if(motivo === '') {
-            Swal.fire({
-                icon: 'error',
-                title: 'Campo requerido',
-                text: 'Por favor describe el problema o motivo del mantenimiento',
-                didOpen: () => {
-                    $('#motivoMalEstado').addClass('is-invalid').focus();
-                }
-            });
-            return;
-        }
-
-        // Mostrar indicador de carga
-        const boton = $(this);
-        const textoOriginal = boton.html();
-        boton.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Procesando...');
-
-        // Enviar petición AJAX
-        $.ajax({
-            url: "ajax/devoluciones.ajax.php",
-            method: "POST",
-            data: {
-                accion: "marcarMantenimiento",
-                idPrestamo: prestamoId,
-                idEquipo: equipoId,
-                motivo: motivo
-            },
-            dataType: "json",
-            success: function(respuesta) {
-                if(respuesta && respuesta.success) {
-                    // Resetear el formulario
-                    $('#formMalEstado')[0].reset();
-                    
-                    Swal.fire({
-                        icon: "success",
-                        title: respuesta.status === "ok_prestamo_actualizado" 
-                            ? "¡Préstamo completado!" 
-                            : "¡Equipo en mantenimiento!",
-                        text: respuesta.message,
-                        showConfirmButton: false,
-                        timer: 2000
-                    }).then(() => {
-                        $('#modalMalEstado').modal('hide');
-                        
-                        // Eliminar la fila del equipo procesado
-                        const filaEquipo = $(`button[data-prestamo-id="${prestamoId}"][data-equipo-id="${equipoId}"]`).closest('tr');
-                        filaEquipo.fadeOut(400, function() {
-                            $(this).remove();
-                            
-                            // Actualizar la interfaz si no hay más equipos
-                            if ($('#equiposListContainer tbody tr').length === 0) {
-                                $('#equiposListContainer').html(
-                                    '<div class="alert alert-info text-center">' +
-                                    'Todos los equipos han sido procesados</div>'
-                                );
-                                
-                                if (respuesta.status === "ok_prestamo_actualizado") {
-                                    setTimeout(() => {
-                                        $('#modalVerDetallesPrestamo').modal('hide');
-                                        if (typeof tablaDevoluciones !== 'undefined') {
-                                            tablaDevoluciones.ajax.reload(null, false);
-                                        }
-                                    }, 500);
-                                }
-                            }
-                        });
-                    });
-                } else {
-                    let errorMsg = "Hubo un problema al procesar la solicitud.";
-                    if (respuesta && respuesta.message) {
-                        errorMsg = respuesta.message;
-                    } else if (!respuesta) {
-                        errorMsg = "No se recibió respuesta del servidor.";
+    // Evento para marcar en mal estado directamente
+    $(document).on("click", ".btnMarcarMalEstado", function() {
+        var idDetallePrestamo = $(this).attr("id_detalle_prestamo");
+        var idPrestamo = $(this).attr("id_prestamo");
+    
+        Swal.fire({
+            title: '¿Está seguro?',
+            text: "El equipo será marcado para mantenimiento y no podrá revertir esta acción.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sí, marcar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                var datos = new FormData();
+                datos.append("accion", "marcarMantenimientoDetalle");
+                datos.append("id_detalle_prestamo", idDetallePrestamo);
+                datos.append("id_prestamo", idPrestamo);
+    
+                $.ajax({
+                    url: "ajax/devoluciones.ajax.php",
+                    method: "POST",
+                    data: datos,
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    dataType: "json",
+                    success: function(respuesta) {
+                        if (respuesta.success) {
+                            Swal.fire(
+                                '¡Hecho!',
+                                respuesta.message,
+                                'success'
+                            ).then(() => {
+                                // Actualizar la tabla o la fila específica
+                                tablaDevoluciones.ajax.reload();
+                            });
+                        } else {
+                            Swal.fire(
+                                'Error',
+                                respuesta.message,
+                                'error'
+                            );
+                        }
                     }
-                    
-                    Swal.fire({
-                        icon: "error",
-                        title: "Error",
-                        html: `<p>${errorMsg}</p><small>Intente nuevamente o contacte al administrador</small>`,
-                        confirmButtonText: "Entendido"
-                    });
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error("Error en la petición AJAX:", error, xhr.responseText);
-                Swal.fire({
-                    icon: "error",
-                    title: "Error de conexión",
-                    text: "No se pudo completar la operación. Detalle: " + (xhr.responseText || error),
-                    confirmButtonText: "Reintentar"
                 });
-            },
-            complete: function() {
-                boton.prop('disabled', false).html(textoOriginal);
             }
         });
     });
+
+    // El código para el modal de mal estado será eliminado.
+
 });
 
 /*=============================================            

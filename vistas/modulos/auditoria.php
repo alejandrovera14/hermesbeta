@@ -6,38 +6,41 @@
     </div>
   </section>
 
-      <div class="card">
-        <div class="card-body">
-          <table id="tablaAuditoria" class="table table-bordered table-striped w-100">
-            <thead class="bg-dark">
-              <tr>
-                <th>Tipo Doc.</th>
-                <th>Número Doc.</th>
-                <th>Nombre</th>
-                <th>Apellido</th>
-                <th>Editado Por</th>
-                <th>Fecha de Cambio</th>
-                <th>Detalle</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <table id="tablaAuditoria" class="table table-bordered table-striped w-100">
+                                <thead class="bg-dark">
+                                    <tr>
+                                        <th>ID Usuario</th>
+                                        <th>Tipo Doc.</th>
+                                        <th>Número Doc.</th>
+                                        <th>Nombre</th>
+                                        <th>Apellido</th>
+                                        <th>Editado Por</th>
+                                        <th>Campo Modificado</th>
+                                        <th>Valor Anterior</th>
+                                        <th>Valor Nuevo</th>
+                                        <th>Fecha Cambio</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- El tbody queda vacío porque lo llena DataTables por AJAX -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  </section>
+    </section>
+    <!-- /.content -->
 </div>
-
-<!-- Modal Detalle de Auditoría -->
-<div class="modal fade" id="modalDetalleAuditoria" tabindex="-1" role="dialog">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header bg-primary text-white">
-        <h5 class="modal-title">Detalle de Cambios</h5>
-        <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
-      </div>
-      <div class="modal-body" id="detalleAuditoriaBody"></div>
-    </div>
-  </div>
-</div>
-
+<!-- Moment.js y Daterangepicker -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css">
+<script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>

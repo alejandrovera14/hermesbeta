@@ -1,12 +1,12 @@
 <?php
-    $item = "id_modulo";
-    $valor = 4;
-    $respuesta = ControladorModulos::ctrMostrarModulos($item, $valor);
-    if ($respuesta["estado"] == "inactivo") {
-        echo '<script>
+$item = "id_modulo";
+$valor = 4;
+$respuesta = ControladorModulos::ctrMostrarModulos($item, $valor);
+if ($respuesta["estado"] == "inactivo") {
+    echo '<script>
             window.location = "desactivado";
         </script>';
-    }
+}
 ?>
 <!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
@@ -52,39 +52,33 @@
                                         $item = "id_prestamo";
                                         $valor = $value["id_prestamo"];
                                         $autorizaciones = ControladorAutorizaciones::ctrMostrarAutorizaciones($item, $valor);
-                                        //var_dump($salidas);
-                                        if (($value["tipo_prestamo"] == "Reservado")){
-                                        echo '
+                                        // var_dump($autorizaciones);
+                                        if (($value["tipo_prestamo"] == "Reservado")) {
+                                            echo '
                                         <tr>
                                             <td>' . $value["id_prestamo"] . '</td>
                                             <td>' . $value["nombre"] . '</td>
                                             <td>' . $value["tipo_prestamo"] . '</td>
                                             <td>' . $value["estado_prestamo"] . '</td>';
-                                                if (isset($autorizaciones["firma_coordinacion"]) && $autorizaciones["firma_coordinacion"] == "Firmado") {
-                                                    echo '<td><input type="checkbox" checked disabled title="Aprobado por '. $_SESSION["nombre"] .' ' . $_SESSION["apellido"] .'">' . '</td>';
-                                                } else {
-                                                    echo '<td><input type="checkbox" disabled title="En trámite...">' . '</td>';
-                                                }
-                                                if (isset($autorizaciones["firma_lider_tic"]) && $autorizaciones["firma_lider_tic"] == "Firmado") {
-                                                    echo '<td><input type="checkbox" checked disabled title="Aprobado por '. $_SESSION["nombre"] .' ' . $_SESSION["apellido"] .'">' . '</td>';
-                                                } else {
-                                                    echo '<td><input type="checkbox" disabled title="En trámite...">' . '</td>';
-                                                }
-                                                if (isset($autorizaciones["firma_almacen"]) && $autorizaciones["firma_almacen"] == "Firmado") {
-                                                    echo '<td><input type="checkbox" checked disabled title="Aprobado por '. $_SESSION["nombre"] .' ' . $_SESSION["apellido"] .'">' . '</td>';
-                                                } else {
-                                                    echo '<td><input type="checkbox" disabled title="En trámite...">' . '</td>';
-                                                }
-                                                echo '<td>
+                                            if (isset($autorizaciones["firma_coordinacion"]) && $autorizaciones["firma_coordinacion"] == "Firmado") {
+                                                echo '<td><input type="checkbox" checked disabled title="Aprobado por ' . $autorizaciones["nombre_usuario_coordinacion"] . '">' . '</td>';
+                                            } else {
+                                                echo '<td><input type="checkbox" disabled title="En trámite...">' . '</td>';
+                                            }
+                                            if (isset($autorizaciones["firma_lider_tic"]) && $autorizaciones["firma_lider_tic"] == "Firmado") {
+                                                echo '<td><input type="checkbox" checked disabled title="Aprobado por ' . $autorizaciones["nombre_usuario_lider_tic"] . '">' . '</td>';
+                                            } else {
+                                                echo '<td><input type="checkbox" disabled title="En trámite...">' . '</td>';
+                                            }
+                                            if (isset($autorizaciones["firma_almacen"]) && $autorizaciones["firma_almacen"] == "Firmado") {
+                                                echo '<td><input type="checkbox" checked disabled title="Aprobado por ' . $autorizaciones["nombre_usuario_almacen"] . '">' . '</td>';
+                                            } else {
+                                                echo '<td><input type="checkbox" disabled title="En trámite...">' . '</td>';
+                                            }
+                                            echo '<td>
                                                     <div class="btn-group">
                                                         <button title="Ver detalles" class="btn btn-default btn-sm btnVerDetalles" data-id="' . $value["id_prestamo"] . '" data-toggle="modal" data-target="#modalDetallesPrestamo">
                                                             <i class="fas fa-eye"></i>
-                                                        </button>
-                                                        <button title="Editar préstamo" class="btn btn-default btn-sm btnEditarPrestamo" data-id="' . $value["id_prestamo"] . '" data-toggle="modal" data-target="#modalEditarPrestamo">
-                                                            <i class="fas fa-edit"></i>
-                                                        </button>
-                                                        <button title="Solicitudes relacionadas" class="btn btn-default btn-sm btnSolicitudesPrestamo" data-id="' . $value["id_prestamo"] . '" data-toggle="modal" data-target="#modalSolicitudesPrestamo">
-                                                            <i class="fas fa-laptop"></i>
                                                         </button>
                                                     </div>
                                                 </td>
@@ -147,7 +141,7 @@
                             </div>
                             <div class="card-body p-10">
                                 <table class="table table-bordered table-striped " id="tblDetallePrestamo">
-                                    <thead>
+                                    <thead class="bg-dark">
                                         <tr>
                                             <th>ID</th>
                                             <th>Categoría</th>
@@ -172,9 +166,11 @@
                     <input type="hidden" id="idPrestamoSalida" name="idPrestamoSalida" value="">
 
                     <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
-                    <button type="submit" class="btn btn-success" id="btnAceptarPrestamo">Aceptar</button>
-
                     <?php
+                    if (ControladorValidacion::validarPermisoSesion([16])) {
+                        echo '<button type="submit" class="btn btn-success" id="btnAceptarPrestamo">Aceptar</button>';
+                    }
+
                     $aceptarSalida = new Controladorsalidas();
                     $aceptarSalida->ctrAceptarSalida();
                     ?>

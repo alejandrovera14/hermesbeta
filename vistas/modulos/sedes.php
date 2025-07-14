@@ -7,7 +7,10 @@ if ($respuesta["estado"] == "inactivo") {
                 window.location = "desactivado";
             </script>';
 }
+
 ?>
+
+
 
 <!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
@@ -20,9 +23,11 @@ if ($respuesta["estado"] == "inactivo") {
                 </div>
                 <div class="col-sm-6">
                     <?php
+                    // Check if the user has permission to add a new Sede
                     if (ControladorValidacion::validarPermisoSesion([24])) {
                         echo '<button class="btn btn-primary float-right" data-toggle="modal" data-target="#modalAddSede">Agregar Sede</button>';
                     }
+
                     ?>
                 </div>
             </div>
@@ -36,10 +41,10 @@ if ($respuesta["estado"] == "inactivo") {
                 <div class="col-12">
                     <div class="card">
                         <div class="card-body">
-                            <table id="tblSedes" class="table table-bordered table-striped table-hover">
+                            <table id="tblSedes" class="table table-bordered table-striped">
                                 <thead class="bg-dark">
                                     <tr>
-                                        <th>#</th>
+                                        <th>ID</th>
                                         <th>Nombre</th>
                                         <th>Dirección</th>
                                         <th>Descripción</th>
@@ -49,46 +54,49 @@ if ($respuesta["estado"] == "inactivo") {
                                 </thead>
                                 <tbody>
                                     <?php
+
+                                    // Fetch the list of Sedes
                                     $item = null;
                                     $valor = null;
                                     $sedes = ControladorSedes::ctrMostrarSedes($item, $valor);
+                                    // var_dump($sedes); // Debugging line to check the data
 
+                                    // Loop through the Sedes and display them in the table
                                     foreach ($sedes as $key => $value) {
                                         echo '<tr>
-                                                <td>'.($key + 1).'</td>
-                                                <td>'.$value["nombre_sede"].'</td>
-                                                <td>'.$value["direccion"].'</td>
-                                                <td>'.$value["descripcion"].'</td>
+                                                <td>' . ($key + 1) . '</td>
+                                                <td>' . $value["nombre_sede"] . '</td>
+                                                <td>' . $value["direccion"] . '</td>
+                                                <td>' . $value["descripcion"] . '</td>
                                                 <td>';
-                                        if (ControladorValidacion::validarPermisoSesion([23])) {
+                                        if (ControladorValidacion::validarPermisoSesion([15])) {
                                             if ($value["estado"] == "activa") {
-                                                echo '<button class="btn btn-success btnActivarSede" idSede="'.$value["id_sede"].'" estadoSede="inactiva"><i class="fas fa-check"></i></button>';
+                                                echo '<button class="btn btn-success btn-xs btnActivarSede" idSede="' . $value["id_sede"] . '" estadoSede="inactiva"">Activa</button>';
                                             } else {
-                                                echo '<button class="btn btn-danger btnActivarSede" idSede="'.$value["id_sede"].'" estadoSede="activa"><i class="fas fa-ban"></i></button>';
+                                                echo '<button class="btn btn-danger btn-xs" idSede="' . $value["id_sede"] . '" estadoSede="activa">Inactiva</button>';
                                             };
                                         } else {
                                             if ($value["estado"] == "activa") {
-                                                echo '<button class="btn btn-success disabled"><i class="fas fa-check"></i></button>';
+                                                echo '<button class="btn btn-success btn-xs disabled">Activa</button>';
                                             } else {
-                                                echo '<button class="btn btn-danger disabled"><i class="fas fa-ban"></i></button>';
+                                                echo '<button class="btn btn-danger btn-xs disabled">Inactiva</button>';
                                             };
                                         }
                                         echo '</td>
-                                                <td>
-                                                    <div class="btn-group">';
+                                                <td>';
                                         if (ControladorValidacion::validarPermisoSesion([23])) {
-                                            echo '<button class="btn btn-default btnConsultarSede" idSede="'.$value["id_sede"].'" title="Consultar sede" data-toggle="modal" data-target="#modalConsultarSede"><i class="fas fa-eye"></i></button>
-                                                  <button class="btn btn-default btnEditarSede" idSede="'.$value["id_sede"].'" title="Editar sede" data-toggle="modal" data-target="#modalEditSede"><i class="fas fa-edit"></i></button>
-                                                  <button class="btn btn-default btnUsuariosSede" idSede="'.$value["id_sede"].'" title="Usuarios de la sede"><i class="fas fa-users"></i></button>';
+                                            echo '<div class="btn-group">
+                                                        <button class="btn btn-default btn-xs btnEditarSede" idSede="' . $value["id_sede"] . '" data-bs-toggle="tooltip" title="Editar sede" data-toggle="modal" data-target="#modalEditSede"><i class="fas fa-edit"></i></button>
+                                                    </div>';
                                         } else {
-                                            echo '<button class="btn btn-default disabled"><i class="fas fa-eye"></i></button>
-                                                  <button class="btn btn-default disabled"><i class="fas fa-edit"></i></button>
-                                                  <button class="btn btn-default disabled"><i class="fas fa-users"></i></button>';
+                                            echo '<div class="btn-group">
+                                                        <button class="btn btn-default disabled btn-xs"><i class="fas fa-edit"></i></button>
+                                                    </div>';
                                         }
-                                        echo '</div>
-                                                </td>
+                                        echo '</td>
                                             </tr>';
                                     }
+
                                     ?>
                                 </tbody>
                             </table>
@@ -98,7 +106,9 @@ if ($respuesta["estado"] == "inactivo") {
             </div>
         </div>
     </section>
+    <!-- /.content -->
 </div>
+<!-- /.content-wrapper -->
 
 <!-- Modal Add Sede -->
 <div class="modal fade" id="modalAddSede" tabindex="-1" role="dialog" aria-labelledby="modalAddSedeLabel" aria-hidden="true">
@@ -132,6 +142,7 @@ if ($respuesta["estado"] == "inactivo") {
                         </div>
 
                         <?php
+                        // Include the PHP file for handling the form submission
                         $crearSede = new ControladorSedes();
                         $crearSede->ctrCrearSede();
                         ?>
@@ -141,6 +152,7 @@ if ($respuesta["estado"] == "inactivo") {
         </div>
     </div>
 </div>
+
 
 <!-- Modal Edit Sede -->
 <div class="modal fade" id="modalEditSede" tabindex="-1" role="dialog">
@@ -175,8 +187,8 @@ if ($respuesta["estado"] == "inactivo") {
                         </div>
 
                         <?php
-                        $editarSede = new ControladorSedes();
-                        $editarSede->ctrEditarSede();
+                        $crearSede = new ControladorSedes();
+                        $crearSede->ctrEditarSede();
                         ?>
                     </form>
                 </div>

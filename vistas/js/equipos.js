@@ -260,3 +260,125 @@ $(document).on("click", ".btnTraspasarUbicacion", function() {
 $('#tblEquipos').on('draw.dt', function () {
     $('[data-toggle="tooltip"]').tooltip();
 });
+
+//************************************************************
+//
+//  SCRIPT PARA IMPORTAR Equipos MASIVAMENTE
+//
+//************************************************************/
+$(document).on("submit", "#modalImportarEquipos form", function(e) {
+    e.preventDefault();
+
+    var fileInput = $("#archivoEquipos");
+    var file = fileInput[0].files[0];
+
+    // Validar que se haya seleccionado un archivo
+    if (!file) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Por favor, seleccione un archivo.'
+        });
+        return;
+    }
+
+    // Validar tipo de archivo (CSV o Excel)
+    var validExtensions = ["csv", "xlsx", "xls"];
+    var fileExtension = file.name.split('.').pop().toLowerCase();
+    if ($.inArray(fileExtension, validExtensions) == -1) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Archivo no válido',
+            text: 'Por favor, seleccione un archivo CSV o Excel (.csv, .xlsx, .xls).'
+        });
+        fileInput.val(''); // Limpiar el input de archivo
+        return;
+    }
+
+    var formData = new FormData();
+    formData.append("archivoEquipos", file);
+    formData.append("accion", "importarEquiposMasivo"); // Acción para el controlador PHP
+    formData.append("cuentadante_id", $("#id_usuario").val());
+
+    Swal.fire({
+        title: 'Importando equipos...',
+        text: 'Esto puede tardar un momento.',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    $.ajax({
+        url: "ajax/equipos.ajax.php", // Ruta al controlador PHP
+        method: "POST",
+        data: formData,
+        contentType: false,
+        processData: false,
+        success: function(response) {
+            
+            Swal.close();
+            try {
+                var jsonResponse = typeof response === 'string' ? JSON.parse(response) : response;
+                if (jsonResponse.status === "success") {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Importación completada!',
+                        html: jsonResponse.message +
+                            '<br><b>Exitosos:</b> ' + (jsonResponse.exitosos ? jsonResponse.exitosos.length : 0) +
+                            '<br><b>Fallidos:</b> ' + (jsonResponse.fallidos ? jsonResponse.fallidos.length : 0),
+                        showConfirmButton: true,
+                        confirmButtonText: "Cerrar",
+                        confirmButtonText: "Descargar reporte",
+                        showCancelButton: true,
+                        cancelButtonText: "Cerrar"
+                        
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            link.click(); // Simula el clic para descargar el reporte
+                        }
+                        });
+                    if (jsonResponse.reporte) {
+                        const contenidoBytes = Uint8Array.from(atob(jsonResponse.reporte), c => c.charCodeAt(0));
+                        var blob = new Blob([contenidoBytes], {type: 'text/plain;charset=utf-8'});
+                        var link = document.createElement('a');
+                        link.href = window.URL.createObjectURL(blob);
+                        link.download = jsonResponse.nombreArchivo;
+                        
+                        //Opción para descargar el reporte si lo deseas
+                         //link.click();
+                    }
+                    $("#modalImportarEquipos").modal('hide');
+                    $('#tblEquipos').DataTable().ajax.reload();
+                    fileInput.val('');
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error en la importación',
+                        text: jsonResponse.message || 'Ocurrió un error al importar los equipos.'
+                    });
+                }
+            } catch (e) {
+                console.error("Raw server response:", response);
+                console.error("Error parsing JSON:", e);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error inesperado',
+                    text: 'La respuesta del servidor no es válida. Por favor, revise el archivo e inténtelo de nuevo.'
+                });
+                console.error("Error parsing response: ", response);
+            }
+        },
+        
+        error: function(jqXHR, textStatus, errorThrown) {
+           
+            Swal.close();
+            Swal.fire({
+                icon: 'error',
+                title: 'Error de conexión',
+                text: 'No se pudo conectar con el servidor. Verifique su conexión e inténtelo de nuevo. Detalles: ' + textStatus + ' - ' + errorThrown
+            });
+            console.error("AJAX error: ", textStatus, errorThrown);
+        }
+    });
+});

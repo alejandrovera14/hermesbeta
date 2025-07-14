@@ -1,22 +1,32 @@
-///// Crear una nueva tabla de Mantenimiento
+///
+NUEVA TABLA DE MANTENIMIENTO
+///
 
-'''sql
-CREATE TABLE `mantenimiento` (
-  `Id_mantenimiento` int(30) NOT NULL,
-  `equipo_id` int(11) NOT NULL,
-  `detalles` text NOT NULL,
-  `gravedad` enum('ninguno','leve','grave') DEFAULT NULL,
-  `tipo_mantenimiento` enum('preventivo','correctivo') DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-# Indices de la tabla `mantenimiento`
---
+
+-- Eliminar columnas anteriores 
+ALTER TABLE `mantenimiento` 
+DROP COLUMN `tipo_mantenimiento`;
+
+-- Modificar la columna `gravedad` para incluir 'inrecuperable'
+ALTER TABLE `mantenimiento` 
+MODIFY COLUMN `gravedad` ENUM('ninguno', 'leve', 'grave', 'inrecuperable') DEFAULT 'ninguno';
+
+-- Agregar nuevas columnas 
 ALTER TABLE `mantenimiento`
-  ADD PRIMARY KEY (`Id_mantenimiento`),
-  ADD KEY `equipo_id` (`equipo_id`);
+ADD COLUMN `id_prestamo` INT(11) NULL AFTER `gravedad`,
+ADD COLUMN `id_usuario` INT(11) NULL AFTER `id_prestamo`,
+ADD COLUMN `fecha_inicio` DATETIME NOT NULL DEFAULT NOW() AFTER `id_usuario`,
+ADD COLUMN `fecha_fin` DATETIME NULL AFTER `fecha_inicio`;
 
-# AUTO_INCREMENT de la tabla `mantenimiento`
---
+-- Asegurar la clave primaria y AUTO_INCREMENT
 ALTER TABLE `mantenimiento`
-  MODIFY `Id_mantenimiento` int(30) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
-COMMIT;
+MODIFY COLUMN `Id_mantenimiento` INT(11) NOT NULL AUTO_INCREMENT,
+ADD PRIMARY KEY (`Id_mantenimiento`);
+
+-- Agregar claves foráneas e índices
+ALTER TABLE `mantenimiento`
+ADD INDEX (`equipo_id`),
+ADD INDEX (`id_prestamo`),
+ADD INDEX (`id_usuario`);
+

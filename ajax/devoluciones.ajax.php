@@ -19,12 +19,12 @@ class AjaxDevoluciones {
         echo json_encode($respuesta);
     }
 
-    /*=============================================
-    MARCAR EQUIPO EN DETALLE_PRESTAMO COMO MANTENIMIENTO
-    =============================================*/
+/*=============================================
+MARCAR EQUIPO EN DETALLE_PRESTAMO COMO MANTENIMIENTO
+=============================================*/
     public function ajaxMarcarMantenimientoDetalle() {
         // No se necesita pasar id_estado desde aquí, ya que se define en el controlador
-        $respuestaControlador = ControladorDevoluciones::ctrMarcarMantenimientoDetalle($this->idPrestamo, $this->idEquipo);
+        $respuestaControlador = ControladorDevoluciones::ctrMarcarMantenimientoDetalle($this->idPrestamo, $this->idEquipo, $this->motivo);
         
         if ($respuestaControlador == "ok") {
             echo json_encode(array("success" => true, "status" => "equipo_marcado", "message" => "Equipo marcado para mantenimiento correctamente."));
@@ -39,48 +39,9 @@ class AjaxDevoluciones {
         }
     }
 
-    /*=============================================
-    MARCAR EQUIPO EN DETALLE_PRESTAMO COMO MANTENIMIENTO CON MOTIVO
-    =============================================*/
-    public function ajaxMarcarMantenimiento() {
-        $respuestaControlador = ControladorDevoluciones::ctrMarcarMantenimiento($this->idPrestamo, $this->idEquipo);
-        
-        // Asegurarse de que la respuesta sea consistente
-        if (is_array($respuestaControlador)) {
-            echo json_encode($respuestaControlador);
-        } else {
-            // Si el controlador devuelve un string simple, convertirlo a formato esperado
-            if ($respuestaControlador == "ok") {
-                echo json_encode(array(
-                    "success" => true, 
-                    "status" => "equipo_marcado", 
-                    "message" => "Equipo enviado a mantenimiento con motivo registrado."
-                ));
-            } else if ($respuestaControlador == "ok_prestamo_actualizado") {
-                echo json_encode(array(
-                    "success" => true, 
-                    "status" => "prestamo_actualizado", 
-                    "message" => "Equipo en mantenimiento y préstamo actualizado a devuelto."
-                ));
-            } else if ($respuestaControlador == "error_actualizando_prestamo") {
-                echo json_encode(array(
-                    "success" => false, 
-                    "status" => "error_prestamo", 
-                    "message" => "Error al actualizar el estado del préstamo."
-                ));
-            } else {
-                echo json_encode(array(
-                    "success" => false, 
-                    "status" => "error_marcado", 
-                    "message" => "Error al enviar el equipoa mantenimiento."
-                ));
-            }
-        }
-    }
-
-    /*=============================================
-    MARCAR EQUIPO EN DETALLE_PRESTAMO COMO DEVUELTO (BUEN ESTADO)
-    =============================================*/
+/*=============================================
+MARCAR EQUIPO EN DETALLE_PRESTAMO COMO DEVUELTO (BUEN ESTADO)
+=============================================*/
     public function ajaxMarcarDevueltoBuenEstado() {
         $respuestaControlador = ControladorDevoluciones::ctrMarcarDevueltoBuenEstado($this->idPrestamo, $this->idEquipo);
         
@@ -95,9 +56,9 @@ class AjaxDevoluciones {
         }
     }
 
-    /*=============================================
-    MARCAR EQUIPO COMO ROBADO (BAJA)
-    =============================================*/
+/*=============================================
+MARCAR EQUIPO COMO ROBADO (BAJA)
+=============================================*/
     public function ajaxMarcarEquipoRobado() {
         $respuestaControlador = ControladorDevoluciones::ctrMarcarEquipoRobado($this->idPrestamo, $this->idEquipo);
         
@@ -163,13 +124,4 @@ if(isset($_POST["accion"]) && $_POST["accion"] === "marcarEquipoRobado") {
     $devolucion->idPrestamo = $_POST["idPrestamo"];
     $devolucion->idEquipo = $_POST["idEquipo"];
     $devolucion->ajaxMarcarEquipoRobado();
-}
-
-// Marcar equipo para mantenimiento con motivo
-if(isset($_POST["accion"]) && $_POST["accion"] === "marcarMantenimiento") {
-    $devolucion = new AjaxDevoluciones();
-    $devolucion->idPrestamo = $_POST["idPrestamo"];
-    $devolucion->idEquipo = $_POST["idEquipo"];
-    $devolucion->motivo = $_POST["motivo"];
-    $devolucion->ajaxMarcarMantenimiento();
 }

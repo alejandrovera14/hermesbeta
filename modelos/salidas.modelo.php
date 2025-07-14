@@ -43,7 +43,7 @@ class Modelosalida
                 JOIN usuarios u ON p.usuario_id = u.id_usuario
                 LEFT JOIN aprendices_ficha af ON u.id_usuario = af.id_usuario
                 LEFT JOIN fichas f ON af.id_ficha = f.id_ficha
-                WHERE p.estado_prestamo IN ('Autorizado', 'Trámite')
+                WHERE p.estado_prestamo IN ('Autorizado', 'Trámite', 'Pendiente')
                 ORDER BY p.fecha_inicio DESC"
             );
 
@@ -88,6 +88,23 @@ class Modelosalida
         
         $stmt -> close();
         $stmt = null;    
+    }
+
+    static public function mdlContarSalidas($tabla, $estado)
+    {
+        if ($estado != null) {
+            $stmt = Conexion::conectar()->prepare("SELECT COUNT(*) as cantidad FROM $tabla WHERE tipo_prestamo = 'Reservado' AND estado_prestamo = :estado");
+            $stmt->bindParam(":estado", $estado, PDO::PARAM_STR);
+            $stmt->execute();
+            return $stmt->fetchColumn();
+        } else {
+            $stmt = Conexion::conectar()->prepare("SELECT COUNT(*) as cantidad FROM $tabla WHERE tipo_prestamo = 'Reservado' AND estado_prestamo IN ('Tramite', 'Pendiente')");
+            $stmt->execute();
+            return $stmt->fetchColumn();
+        }
+
+        $stmt->close();
+        $stmt = null;
     }
 
 } //ModeloSalidas

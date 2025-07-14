@@ -1,4 +1,4 @@
-  <!-- Navbar -->
+<!-- Navbar -->
   <nav class="main-header navbar navbar-expand navbar-white navbar-light">
     <!-- Left navbar links -->
     <ul class="navbar-nav">
@@ -23,31 +23,54 @@
     <ul class="navbar-nav ml-auto">
       <!-- Notifications Dropdown Menu -->
       <li class="nav-item dropdown">
-        <a class="nav-link" data-toggle="dropdown" href="#">
+        <?php
+        // Obtener SOLO las notificaciones NO LEÍDAS para la campana
+        $usuarioId = isset($_SESSION["id_usuario"]) ? $_SESSION["id_usuario"] : null;
+        $notificacionesNoLeidas = ControladorNotificaciones::listarNoLeidas($usuarioId);
+        $totalNoLeidas = !empty($notificacionesNoLeidas) ? count($notificacionesNoLeidas) : 0;
+        ?>
+        
+        <a class="nav-link" data-toggle="dropdown" href="#" id="campana-notificaciones">
           <i class="far fa-bell"></i>
-          <span class="badge badge-warning navbar-badge">15</span>
+          <!-- Badge SOLO se muestra si hay notificaciones NO LEÍDAS -->
+          <?php if ($totalNoLeidas > 0): ?>
+            <span class="badge badge-warning navbar-badge" id="notification-count">
+              <?php echo $totalNoLeidas; ?>
+            </span>
+          <?php else: ?>
+            <span class="badge badge-warning navbar-badge d-none" id="notification-count"></span>
+          <?php endif; ?>
         </a>
+        
+        <!-- Dropdown de notificaciones -->
         <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-          <span class="dropdown-item dropdown-header">15 Notifications</span>
+          <span class="dropdown-item dropdown-header">
+            <?php echo $totalNoLeidas; ?> Notificaciones 
+          </span>
+          
           <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <i class="fas fa-envelope mr-2"></i> 4 new messages
-            <span class="float-right text-muted text-sm">3 mins</span>
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <i class="fas fa-users mr-2"></i> 8 friend requests
-            <span class="float-right text-muted text-sm">12 hours</span>
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <i class="fas fa-file mr-2"></i> 3 new reports
-            <span class="float-right text-muted text-sm">2 days</span>
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item dropdown-footer">See All Notifications</a>
+          
+          <?php if (!empty($notificacionesNoLeidas)): ?>
+            <!-- Mostrar solo las primeras 5 no leídas en el dropdown -->
+            <?php $contador = 0; ?>
+            <?php foreach ($notificacionesNoLeidas as $notificacion): ?>
+              <?php if ($contador >= 5) break; ?>
+              <a href="<?php echo htmlspecialchars($notificacion['url']); ?>" class="dropdown-item">
+                <i class="fas fa-envelope mr-2"></i> 
+                <?php echo htmlspecialchars(substr($notificacion['mensaje'], 0, 50)) . '...'; ?>
+                <span class="float-right text-muted text-sm">
+                  <?php echo htmlspecialchars($notificacion['fecha_creacion']); ?>
+                </span>
+              </a>
+              <div class="dropdown-divider"></div>
+              <?php $contador++; ?>
+            <?php endforeach; ?>
+          <?php endif; ?>
+          
+          <a href="notificaciones" class="dropdown-item dropdown-footer">Ver Todas las Notificaciones</a>
         </div>
       </li>
+      
       <li class="nav-item">
         <a class="nav-link" data-widget="fullscreen" href="#" role="button">
           <i class="fas fa-expand-arrows-alt"></i>

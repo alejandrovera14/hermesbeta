@@ -206,6 +206,31 @@ class ModeloSolicitudes
     }
 
     
+    static public function mdlContarPrestamosPorEstado($tabla, $estado_prestamo, $fecha)
+    {
+        $stmt = Conexion::conectar()->prepare("SELECT COUNT(*) as cantidad FROM $tabla WHERE tipo_prestamo = 'Reservado' AND estado_prestamo = :estado_prestamo and fecha_solicitud >= :fecha");
+        $stmt->bindParam(":estado_prestamo", $estado_prestamo, PDO::PARAM_STR);
+        $stmt->bindParam(":fecha", $fecha, PDO::PARAM_STR);
+        $stmt->execute();
+        return $stmt->fetchColumn();
+        $stmt->close();
+        $stmt = null;
+    }
+
+    static public function mdlContarDevoluciones($tabla, $fecha)
+    {
+        if ($fecha != null) {
+            $stmt = Conexion::conectar()->prepare("SELECT COUNT(*) as cantidad FROM $tabla WHERE estado_prestamo = 'Prestado' AND fecha_fin <= :fecha");
+            $stmt->bindParam(":fecha", $fecha, PDO::PARAM_STR);
+        } else {
+            $stmt = Conexion::conectar()->prepare("SELECT COUNT(*) as cantidad FROM $tabla WHERE estado_prestamo = 'Prestado'");
+        }
+        $stmt->execute();
+        return $stmt->fetchColumn();
+        $stmt->close();
+        $stmt = null;
+ 
+    }
 
 
 

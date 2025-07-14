@@ -315,4 +315,90 @@ class ModeloEquipos{
             }
         }
     }
+    public static function mdlImportarEquipo($tabla, $datos) {
+    try {
+        // Validar que los campos requeridos estén presentes y no sean vacíos
+        $camposRequeridos = ['numero_serie', 'etiqueta', 'descripcion', 'categoria_id', 'cuentadante_id', 'ubicacion_id', 'id_estado'];
+        foreach ($camposRequeridos as $campo) {
+            if (!isset($datos[$campo]) || trim($datos[$campo]) === '') {
+                $mensajeError = "Campo requerido '$campo' no definido o vacío en los datos.";
+                error_log("ERROR en mdlImportarEquipo: " . $mensajeError);
+                return "error: $mensajeError";
+            }
+        }
+
+        // Validar que la ubicación existe
+        $ubicacionStmt = Conexion::conectar()->prepare("SELECT ubicacion_id FROM ubicaciones WHERE ubicacion_id = :ubicacion_id LIMIT 1");
+        $ubicacionStmt->bindParam(":ubicacion_id", $datos["ubicacion_id"], PDO::PARAM_INT);
+        $ubicacionStmt->execute();
+        $ubicacion = $ubicacionStmt->fetch(PDO::FETCH_ASSOC);
+        if (!$ubicacion) {
+            $msg = "No se encontró la ubicación con ID " . $datos["ubicacion_id"];
+            error_log("ERROR en mdlImportarEquipo: " . $msg);
+            return "error: $msg";
+        }
+
+        // Validar que el estado existe
+        $estadoStmt = Conexion::conectar()->prepare("SELECT id_estado FROM estados WHERE id_estado = :id_estado LIMIT 1");
+        $estadoStmt->bindParam(":id_estado", $datos["id_estado"], PDO::PARAM_INT);
+        $estadoStmt->execute();
+        $estado = $estadoStmt->fetch(PDO::FETCH_ASSOC);
+        if (!$estado) {
+            $msg = "No se encontró el estado con ID " . $datos["id_estado"];
+            error_log("ERROR en mdlImportarEquipo: " . $msg);
+            return "error: $msg";
+        }
+
+        // Preparar consulta SQL
+        $sql = "
+            INSERT INTO $tabla (
+                numero_serie,
+                etiqueta,
+                descripcion,
+                categoria_id,
+                ubicacion_id,
+                cuentadante_id,
+                id_estado
+            ) VALUES (
+                :numero_serie,
+                :etiqueta,
+                :descripcion,
+                :categoria_id,
+                :ubicacion_id,
+                :cuentadante_id,
+                :id_estado
+            )
+        ";
+
+        $stmt = Conexion::conectar()->prepare($sql);
+
+        // Enlazar parámetros
+        $stmt->bindParam(":numero_serie", $datos["numero_serie"], PDO::PARAM_STR);
+        $stmt->bindParam(":etiqueta", $datos["etiqueta"], PDO::PARAM_STR);
+        $stmt->bindParam(":descripcion", $datos["descripcion"], PDO::PARAM_STR);
+        $stmt->bindParam(":categoria_id", $datos["categoria_id"], PDO::PARAM_INT);
+        $stmt->bindParam(":ubicacion_id", $datos["ubicacion_id"], PDO::PARAM_INT);
+        $stmt->bindParam(":cuentadante_id", $datos["cuentadante_id"], PDO::PARAM_INT);
+        $stmt->bindParam(":id_estado", $datos["id_estado"], PDO::PARAM_INT);
+
+        // Ejecutar la consulta
+        if ($stmt->execute()) {
+            return "ok";
+        } else {
+            $errorInfo = $stmt->errorInfo();
+            error_log("Error SQL en mdlImportarEquipo: " . $errorInfo[2]);
+            return "error: " . $errorInfo[2];
+        }
+
+    } catch (PDOException $e) {
+        error_log("Excepción PDO en mdlImportarEquipo: " . $e->getMessage());
+        return "error: " . $e->getMessage();
+    } finally {
+        if (isset($stmt)) {
+            $stmt->closeCursor();
+            $stmt = null;
+        }
+    }
+}
+
 }

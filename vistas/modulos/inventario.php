@@ -22,8 +22,14 @@
           if (ControladorValidacion::validarPermisoSesion([1])) {
             echo '
             <div class="col-sm-6">
-              <button class="btn btn-primary float-right" data-toggle="modal" data-target="#modalRegistrarEquipo">Agregar equipo</button>
-            </div>
+            <button class="btn btn-primary float-right" data-toggle="modal" data-target="#modalRegistrarEquipo">Agregar equipo</button>';
+          };
+          if (ControladorValidacion::validarPermisoSesion([6])) {
+            echo '
+            <button class="btn btn-success float-right ml-2" style="margin-right:10px;" data-toggle="modal" data-target="#modalImportarEquipos">
+              <i class="fas fa-upload"></i> Importar Equipos
+            </button>
+            </div>      
             ';
           }
           ?>
@@ -60,6 +66,59 @@
     <!-- /.content -->
   </div>
   <!-- /.content-wrapper -->
+   <!-- Modal para Importar equipos -->
+  <div class="modal fade" id="modalImportarEquipos">
+    <div class="modal-dialog modal-lg"><!-- Cambiado a modal-lg para mayor ancho -->
+      <div class="modal-content">
+        <div class="modal-header bg-success">
+          <h4 class="modal-title">Importar Equipos</h4>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="box-body">
+            <form id="formImportarEquipos" method="POST" enctype="multipart/form-data">
+              <div class="form-group">
+                <label for="archivoEquipos">Seleccionar archivo (.csv, .xlsx, .xls):</label>
+                <input type="file" class="form-control-file" name="archivoEquipos" id="archivoEquipos" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" required>
+              </div>
+              
+              <div class="form-group col-lg-6">
+                <label for="id_usuario">Cuentadante</label>
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-list-alt"></i></span>
+                  </div>
+                  <?php
+                  $item = null;
+                  $valor = null;
+                  $cuentadantes = ControladorUsuarios::ctrMostrarUsuarios($item, $valor);
+                  echo '<select class="form-control" id="id_usuario" name="cuentadante_id" required>';
+                  echo '<option value="">Seleccione un cuentadante</option>';
+                  foreach ($cuentadantes as $key => $cuentadante) {
+                    if($cuentadante["nombre_rol"] == "Almacén"){
+                      echo '<option value="' . $cuentadante["id_usuario"] . '">' . $cuentadante["nombre"] . " " . $cuentadante["apellido"] . " (" . $cuentadante["nombre_rol"]. ")" .'</option>';
+                    }
+                  }
+                  echo '</select>';
+                  ?>
+                </div>
+              </div>
+              
+              <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-success">Importar</button>
+              </div>
+              
+            </form>
+          </div><!-- box-body  -->
+        </div><!-- modal-body  -->
+      </div><!-- Modal content -->
+    </div><!-- modal-dialog  -->
+  </div><!-- modal  -->
+  <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------>
+
 
   <!-- ========== Start Section ==========
   MODAL PARA INGRESAR EQUIPO

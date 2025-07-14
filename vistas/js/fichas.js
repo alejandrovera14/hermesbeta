@@ -17,24 +17,47 @@ $('#tblFichas').DataTable({
         { "data": null }
     ],
     "columnDefs": [
+        // {
+        //     "targets": [0],
+        //     "render": function(data, type, row, meta) {
+        //         return meta.row + 1;
+        //     },
+        // },
         {
             "targets": [6],
             "render": function(data, type, row) {
-                if (data === "activa") {
-                    return "<button class='btn btn-success btnActivarFicha' data-id='" + row[0] + "' data-estado='inactiva'><i class='fas fa-check'></i></button>";
-                } else {
-                    return "<button class='btn btn-danger btnActivarFicha' data-id='" + row[0] + "' data-estado='activa'><i class='fas fa-ban'></i></button>";                    
+                if (usuarioActual["permisos"].includes(11)) {
+                    if (data === "activa") {
+                        //si el usuario tiene permisos para activar/desactivar fichas
+                        return "<button  class='btn btn-success btn-xs btnActivarFicha' idFicha='" + row[0] + "' estadoFicha='inactiva' title='Ficha activa' data-toggle='tooltip'><i class='fas fa-check'></i></button>";
+                    } else {
+                        return "<button  class='btn btn-danger btn-xs btnActivarFicha' idFicha='" + row[0] + "' estadoFicha='activa' title='Ficha inactiva' data-toggle='tooltip'><i class='fas fa-ban'></i></button>";                    
+                    }
+                }else{
+                    if (data === "activa") {
+                        //si el usuario tiene permisos para activar/desactivar fichas
+                        return "<button  class='btn btn-success btn-xs' title='Ficha activa' data-toggle='tooltip' disabled><i class='fas fa-check'></i></button>";
+                    } else {
+                        return "<button  class='btn btn-danger btn-xs' title='Ficha inactiva' data-toggle='tooltip' disabled><i class='fas fa-ban'></i></button>";                    
+                    } 
                 }
             }
         },
+
         {
             "targets": [-1],
-            "render": function(data, type, row) {
-                return "<div class='btn-group'>" +
-                    "<button title='Consultar detalles' class='btn btn-default btnConsultarFicha' idFicha='" + row[0] + "' data-toggle='modal' data-target='#modalConsularFicha'><i class='fas fa-eye'></i></button>" +
-                    "<button title='Editar ficha' class='btn btn-default btnEditarFicha' idFicha='" + row[0] + "' data-toggle='modal' data-target='#modalEditFicha'><i class='fas fa-edit'></i></button>" +
-                    "<button title='Aprendices de la ficha' class='btn btn-default btnAprendicesFicha' idFicha='" + row[0] + "' data-toggle='modal' data-target='#modalAprendicesFicha'><i class='fas fa-users'></i></button>" +
-                "</div>";
+            "render": function(row) {
+                if (usuarioActual["permisos"].includes(14)) {
+                    return "<div class='btn-group'>" +
+                        "<button title='Editar datos ficha' data-tooltip='tooltip' class='btn btn-default btn-xs btnEditarFicha' idFicha='" + row[0] + "' data-toggle='modal' data-target='#modalEditFicha'>" +
+                        "<i class='fas fa-edit '></i>" +
+                        "</button></div>";
+                }else {
+                    return "<div class='btn-group'>" +
+                        "<button title='Editar datos ficha' data-tooltip='tooltip' class='btn btn-default btn-xs' disabled>" +
+                        "<i class='fas fa-edit '></i>" +
+                        "</button></div>";
+                }                 
             }
         }
     ],
@@ -61,7 +84,9 @@ $('#tblFichas').DataTable({
 });
 
 $(document).on("click", ".btnEditarFicha", function() {
+// $(".btnEditarFicha").click(function() {
     var idFicha = $(this).attr("idFicha");
+    console.log("idFicha:", idFicha);
     var datos = new FormData();
     datos.append("idFicha", idFicha);
     $.ajax({
@@ -73,6 +98,7 @@ $(document).on("click", ".btnEditarFicha", function() {
         processData: false,
         dataType: "json",
         success: function(respuesta) {
+            console.log("ficha:",respuesta);
             $("#idEditFicha").val(respuesta["id_ficha"]);
             $("#editCodigoFicha").val(respuesta["codigo"]);
             $("#editDescripcionFicha").val(respuesta["descripcion"]);
@@ -81,24 +107,17 @@ $(document).on("click", ".btnEditarFicha", function() {
             
             $("#editSedeFicha").val(respuesta["id_sede"]);
             $("#editSedeFicha").html(respuesta["nombre_sede"]);
-        }
+            
+        },
     });
 });
 
 $(document).on("click", ".btnActivarFicha", function() {
-    var idFichaActivar = $(this).data("id");
-    var estadoFicha = $(this).data("estado");
-    var boton = $(this);
-
-    // Desactivar temporalmente el botón
-    boton.prop('disabled', true);
-    var textoOriginal = boton.html();
-    boton.html('<i class="fas fa-spinner fa-spin"></i>');
-
+    var idFichaActivar = $(this).attr("idFicha");
+    var estadoFicha = $(this).attr("estadoFicha");
     var datos = new FormData();
     datos.append("idFichaActivar", idFichaActivar);
     datos.append("estadoFicha", estadoFicha);
-
     $.ajax({
         url: "ajax/fichas.ajax.php",
         method: "POST",
@@ -107,27 +126,20 @@ $(document).on("click", ".btnActivarFicha", function() {
         contentType: false,
         processData: false,
         success: function(respuesta) {
-            if (respuesta.trim() === "ok") {
-                // Cambiar estado visualmente sin recargar
-                if (estadoFicha === "activa") {
-                    boton.removeClass('btn-danger').addClass('btn-success');
-                    boton.html('<i class="fas fa-check"></i>');
-                    boton.data('estado', 'inactiva');
-                } else {
-                    boton.removeClass('btn-success').addClass('btn-danger');
-                    boton.html('<i class="fas fa-ban"></i>');
-                    boton.data('estado', 'activa');
-                }
-            } else {
-                Swal.fire("Error", "No se pudo cambiar el estado", "error");
-            }
-            boton.prop('disabled', false);
-        },
-        error: function() {
-            Swal.fire("Error", "Fallo de conexión", "error");
-            boton.prop('disabled', false).html(textoOriginal);
+            console.log("cambiado el estado", respuesta);
         }
-    });
+    })
+    if (estadoFicha == "inactiva") {
+        $(this).removeClass("btn-success");
+        $(this).addClass("btn-danger");
+        $(this).html('<i class="fas fa-ban">');
+        $(this).attr("estadoFicha", "activa");
+    }else {
+        $(this).removeClass("btn-danger");
+        $(this).addClass("btn-success");
+        $(this).html('<i class="fas fa-check">');
+        $(this).attr("estadoFicha", "inactiva");
+    }
 });
 
 //tooltips

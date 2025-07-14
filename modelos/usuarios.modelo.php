@@ -70,7 +70,7 @@ class ModeloUsuarios
                                                             r.id_rol, r.nombre_rol, 
                                                             f.id_ficha, f.descripcion AS descripcion_ficha, f.codigo, f.estado AS estado_ficha,
                                                             s.id_sede, s.nombre_sede,
-                                                            u.id_usuario,u.numero_documento
+                                                            u.id_usuario,u.numero_documento, condicion
                                                             -- f.estado se llamo para mostrar el estado de la ficha en solicitudes
                                                             -- u.nombre,
                                                             -- u.apellido
@@ -124,13 +124,14 @@ class ModeloUsuarios
         =============================================*/
     static public function mdlEditarPerfil($tabla, $datos)
     {
-        error_log("Consulta SQL: UPDATE $tabla SET tipo_documento = {$datos['tipo_documento']}, numero_documento = {$datos['numero_documento']}, nombre = {$datos['nombre']}, apellido = {$datos['apellido']}, correo_electronico = {$datos['correo_electronico']}, telefono = {$datos['telefono']}, direccion = {$datos['direccion']}, genero = {$datos['genero']}, foto = {$datos['foto']} WHERE id_usuario = {$datos['id_usuario']}");
+        error_log("Consulta SQL: UPDATE $tabla SET tipo_documento = {$datos['tipo_documento']}, numero_documento = {$datos['numero_documento']}, nombre = {$datos['nombre']}, apellido = {$datos['apellido']}, correo_electronico = {$datos['correo_electronico']}, telefono = {$datos['telefono']}, direccion = {$datos['direccion']}, genero = {$datos['genero']}, clave = {$datos['clave']}, foto = {$datos['foto']} WHERE id_usuario = {$datos['id_usuario']}");
         try {
             $stmt = Conexion::conectar()->prepare("UPDATE $tabla SET 
                     correo_electronico = :correo_electronico,
                     telefono = :telefono,
                     direccion = :direccion,
                     genero = :genero,
+                    clave = :clave,
                     foto = :foto
                     WHERE id_usuario = :id_usuario");
 
@@ -138,6 +139,7 @@ class ModeloUsuarios
             $stmt->bindParam(":telefono", $datos["telefono"], PDO::PARAM_STR);
             $stmt->bindParam(":direccion", $datos["direccion"], PDO::PARAM_STR);
             $stmt->bindParam(":genero", $datos["genero"], PDO::PARAM_STR);
+            $stmt->bindParam(":clave", $datos["clave"], PDO::PARAM_STR);
             $stmt->bindParam(":foto", $datos["foto"], PDO::PARAM_STR);
             $stmt->bindParam(":id_usuario", $datos["id_usuario"], PDO::PARAM_INT);
 
@@ -254,18 +256,14 @@ class ModeloUsuarios
         }
     }
 
-    // Cambiar condición de usuario con auditoría (registra editor)
-    public static function mdlCambiarCondicionUsuario($tabla, $datos) {
+    // Cambiar condición de usuario (solo admin puede cambiar)
+    public static function mdlCambiarCondicionUsuario($tabla, $datos)
+    {
         try {
-            $conexion = Conexion::conectar();
-
-            // Setear id del usuario editor para auditoría
-            $conexion->exec("SET @id_usuario_editor = " . intval($datos["id_usuario_editor"]));
-
-            $stmt = $conexion->prepare(
+            $stmt = Conexion::conectar()->prepare(
                 "UPDATE $tabla SET condicion = :condicion WHERE id_usuario = :id_usuario"
             );
-            
+
             $stmt->bindParam(":condicion", $datos["condicion"], PDO::PARAM_STR);
             $stmt->bindParam(":id_usuario", $datos["id_usuario"], PDO::PARAM_INT);
 
@@ -273,11 +271,9 @@ class ModeloUsuarios
                 return "ok";
             }
             return "error";
-        } catch(PDOException $e) {
+        } catch (PDOException $e) {
             error_log("Error en mdlCambiarCondicionUsuario: " . $e->getMessage());
             return "error";
-        } finally {
-            $conexion = null;
         }
     }
 

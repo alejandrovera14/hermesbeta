@@ -67,6 +67,24 @@ class ControladorSolicitudes
         return $respuesta;
     }
 
+    static public function ctrContarPrestamosPorEstado($estado_prestamo, $fecha)
+    {
+        $tabla = "prestamos";
+        $respuesta = ModeloSolicitudes::mdlContarPrestamosPorEstado($tabla, $estado_prestamo, $fecha);
+        return $respuesta;
+
+    }
+
+    static public function ctrContarDevoluciones($fecha)
+    {
+        $tabla = "prestamos";
+        $respuesta = ModeloSolicitudes::mdlContarDevoluciones($tabla, $fecha);
+        return $respuesta;
+    }
+
+
+
+
     public static function ctrContarEquiposPorCategoria() {
         return ModeloSolicitudes::mdlContarEquiposPorCategoria();
     }
@@ -74,9 +92,5 @@ class ControladorSolicitudes
     public static function ctrContarEquiposPorReserva() {
         return ModeloSolicitudes::mdlContarEquiposPorReserva();
     }
-
-    
-
-
 
 }

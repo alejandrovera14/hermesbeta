@@ -38,7 +38,6 @@
               $item = null;
               $valor = null;
               $prestamos = ControladorSolicitudes::ctrMostrarPrestamo($item, $valor);
-
               foreach ($prestamos as $key => $value) {
                 if ($value["tipo_prestamo"] == "Reservado" && $value["estado_prestamo"] != "Prestado" && $value["estado_prestamo"] != "Devuelto") {
                   $item = "id_prestamo";
@@ -257,7 +256,6 @@
         <button type="button" class="btn btn-primary btnAutorizar btnAccionFirma d-none">Autorizar</button>
         <button type="button" class="btn btn-danger btnDesautorizar d-none">Desautorizar</button>
       </div>
-
     </div>
   </div>
 </div>

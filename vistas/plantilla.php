@@ -75,6 +75,9 @@ session_start();
 
   <!-- AdminLTE App -->
   <script src="vistas/dist/js/adminlte.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   
 
   <!-- CSS para evitar FOUC (Flash of Unstyled Content) -->
@@ -140,7 +143,6 @@ session_start();
         $_GET["ruta"] == "desactivado" ||
         $_GET["ruta"] == "auditoria" ||
         $_GET["ruta"] == "notificaciones" ||
-        $_GET["ruta"] == "redactar" ||
         $_GET["ruta"] == "salir"
       ) {
 
@@ -176,6 +178,7 @@ session_start();
   <script src="vistas/js/mis-solicitudes.js"></script>
   <script src="vistas/js/mantenimiento.js"></script>
   <script src="vistas/js/notificaciones.js"></script>
+  <script src="vistas/js/inicio.js"></script>
 
   <!-- JS para evitar FOUC (Flash of Unstyled Content) -->
   <script>

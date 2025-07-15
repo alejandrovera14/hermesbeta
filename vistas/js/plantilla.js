@@ -4,7 +4,7 @@ window.addEventListener('load', function() {
   // initializeDataTable("#tblUsuarios");
   // initializeDataTable("#tblEquipos");
   initializeDataTable("#tblRoles");
-  initializeDataTable("#tblAutorizaciones");
+  // initializeDataTable("#tblAutorizaciones");
   initializeDataTable("#tblDevoluciones");
   initializeDataTable("#tblMantenimiento");
   initializeDataTable("#tblModalHistoricoSolicitudes");
@@ -15,7 +15,9 @@ window.addEventListener('load', function() {
 window.addEventListener('load', function() {
   initializeDataTableSimple("#tblPerGestionEquipos");
   initializeDataTableSimple("#tblPerSolicitudesAutorizaciones");
-  // initializeDataTableActivar("#tblActivosSolicitar");
+  initializeDataTableSimple("#tblActivosSolicitar");
+  initializeDataTableSimple("#tblNotificaciones");
+
 });
 
 function initializeDataTable(selector) {

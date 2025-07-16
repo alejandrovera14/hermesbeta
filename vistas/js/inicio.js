@@ -5,7 +5,13 @@ const ctx = document.getElementById('line-chart-prestamos').getContext('2d');
 let chart;
 
 function cargarGrafico(tipo = 'actual') {
-  fetch(`ajax/inicio.ajax.php?tipo=${tipo}`)
+  fetch('ajax/inicio.ajax.php', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: `accion=obtenerPrestamosPorDia&tipo=${tipo}`
+  })
     .then(res => res.json())
     .then(data => {
       console.log(data); 
@@ -37,12 +43,11 @@ function cargarGrafico(tipo = 'actual') {
           scales: {
             x: { ticks: { color: '#000' } },
             y: {
-              beginAtZero: true,        
-              suggestedMin: 0,           
+              beginAtZero: true,
+              suggestedMin: 0,
               suggestedMax: 5,
               ticks: { color: '#000' }
             }
-
           }
         }
       });
@@ -64,7 +69,7 @@ var datos = FormData();
 datos.append("datosGrafica", datosGraficas);
 
 $.ajax({
-  url: "ajax/inicio2.ajax.php",
+  url: "ajax/inicio.ajax.php",
   method: "POST",
   data: datos,
   cache: false,

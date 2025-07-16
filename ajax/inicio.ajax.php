@@ -1,35 +1,56 @@
 <?php
-
 require_once "../controladores/inicio.controlador.php";
 require_once "../modelos/inicio.modelo.php";
 
-$tipo = $_GET["tipo"] ?? 'actual';
+class AjaxInicio{
 
-// Obtener datos del controlador
-$datos = ControladorInicio::ctrObtenerPrestamosPorDia($tipo);
+    static public function ajaxObtenerGraficos(){
+        $respuesta = ControladorInicio::ctrObtenerEstadosEquipos();
+        echo json_encode($respuesta);
+        error_log(print_r($respuesta, true));
+    }
 
-// Lista de días en orden
-$diasSemana = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+    static public function ajaxObtenerPrestamosPorDia($tipo) {
+        // Obtener datos del controlador
+        $datos = ControladorInicio::ctrObtenerPrestamosPorDia($tipo);
 
-// Inicializar array con 0 para todos los días
-$datosCompletos = [];
+        // Lista fija de días en orden
+        $diasSemana = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
 
-foreach ($diasSemana as $dia) {
-    $datosCompletos[$dia] = 0;
+        // Inicializar array con ceros
+        $datosCompletos = [];
+        foreach ($diasSemana as $dia) {
+            $datosCompletos[$dia] = 0;
+        }
+
+        // Rellenar con los datos reales
+        foreach ($datos as $dato) {
+            $dia = $dato["dia"];
+            $cantidad = $dato["cantidad"];
+            $datosCompletos[$dia] = (int)$cantidad;
+        }
+
+        // Formatear para enviar como JSON
+        $respuesta = [];
+        foreach ($diasSemana as $dia) {
+            $respuesta[] = ["dia" => $dia, "cantidad" => $datosCompletos[$dia]];
+        }
+
+        header('Content-Type: application/json');
+        echo json_encode($respuesta);
+        error_log(print_r($respuesta, true));
+    }
+
+    
 }
 
-// Rellenar con datos reales
-foreach ($datos as $dato) {
-    $dia = $dato["dia"];
-    $cantidad = $dato["cantidad"];
-    $datosCompletos[$dia] = (int)$cantidad;
-}
+if (isset($_POST["accion"])) {
 
-// Formatear para enviar como JSON
-$respuesta = [];
-foreach ($diasSemana as $dia) {
-    $respuesta[] = ["dia" => $dia, "cantidad" => $datosCompletos[$dia]];
+    if ($_POST["accion"] === "obtenerGraficos") {
+        AjaxInicio::ajaxObtenerGraficos();
+    
+    } else if ($_POST["accion"] === "obtenerPrestamosPorDia") {
+        $tipo = $_POST["tipo"] ?? 'actual';
+        AjaxInicio::ajaxObtenerPrestamosPorDia($tipo);
+    }
 }
-
-header('Content-Type: application/json');
-echo json_encode($respuesta);

@@ -64,7 +64,7 @@ var datos = FormData();
 datos.append("datosGrafica", datosGraficas);
 
 $.ajax({
-  url: "ajax/inicio.ajax.php",
+  url: "ajax/inicio2.ajax.php",
   method: "POST",
   data: datos,
   cache: false,

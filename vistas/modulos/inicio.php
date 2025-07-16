@@ -23,13 +23,14 @@
             <div class="inner">
               <h3>Portátiles</h3>
               <p><strong>Disponibles:</strong> <?php echo isset($conteos[1]) ? $conteos[1] : 0; ?><br>
-              <strong>Reservados:</strong> <?php echo isset($conteos2[1]) ? $conteos2[1] : 0; ?></p>
+                <strong>Reservados:</strong> <?php echo isset($conteos2[1]) ? $conteos2[1] : 0; ?>
+              </p>
 
             </div>
             <div class="icon">
               <i class="fas fa-desktop"></i>
             </div>
-            
+
           </div>
         </div>
 
@@ -39,12 +40,13 @@
             <div class="inner">
               <h3>Sonido</h3>
               <p><strong>Disponibles:</strong> <?php echo isset($conteos[3]) ? $conteos[3] : 0; ?><br>
-              <strong>Reservados:</strong> <?php echo isset($conteos2[3]) ? $conteos2[3] : 0; ?></p>
+                <strong>Reservados:</strong> <?php echo isset($conteos2[3]) ? $conteos2[3] : 0; ?>
+              </p>
             </div>
             <div class="icon">
               <i class="fas fa-volume-up"></i>
             </div>
-            
+
           </div>
         </div>
 
@@ -54,12 +56,13 @@
             <div class="inner">
               <h3>Videobeam</h3>
               <p><strong>Disponibles:</strong> <?php echo isset($conteos[2]) ? $conteos[2] : 0; ?><br>
-              <strong>Reservados:</strong> <?php echo isset($conteos2[2]) ? $conteos2[2] : 0; ?></p>
+                <strong>Reservados:</strong> <?php echo isset($conteos2[2]) ? $conteos2[2] : 0; ?>
+              </p>
             </div>
             <div class="icon">
               <i class="fas fa-video"></i>
             </div>
-            
+
           </div>
         </div>
 
@@ -69,75 +72,76 @@
             <div class="inner">
               <h3>Control remoto</h3>
               <p><strong>Disponibles:</strong> <?php echo isset($conteos[5]) ? $conteos[5] : 0; ?><br>
-              <strong>Reservados:</strong> <?php echo isset($conteos2[5]) ? $conteos2[5] : 0; ?></p>
+                <strong>Reservados:</strong> <?php echo isset($conteos2[5]) ? $conteos2[5] : 0; ?>
+              </p>
             </div>
             <div class="icon">
               <i class="fas fa-gamepad"></i>
             </div>
-            
+
           </div>
         </div>
 
         <!-- Contenedor principal -->
         <div class="row col-12">
-            <!-- Tarjeta para Estados de Equipos -->
-            <div class="col-lg-6 col-md-12">
-                <div class="card">
-                    <div class="card-header bg-dark">
-                        <h3 class="card-title"><i class="fas fa-chart-pie"></i> Estados de equipos</h3>
-                        <div class="card-tools">
-                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="pie-chart-equipos" width="200" height="200"></canvas>
-                    </div>
+          <!-- Tarjeta para Estados de Equipos -->
+          <div class="col-lg-6 col-md-12">
+            <div class="card">
+              <div class="card-header bg-dark">
+                <h3 class="card-title"><i class="fas fa-chart-pie"></i> Estados de equipos</h3>
+                <div class="card-tools">
+                  <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                    <i class="fas fa-minus"></i>
+                  </button>
                 </div>
+              </div>
+              <div class="card-body">
+              <canvas id="pie-chart-equipos" style="min-height: 250px; height: 150px;"></canvas>
+              </div>
             </div>
+          </div>
 
-            <?php
-            $labelsEquipos = [];
-            $dataEquipos = [];
-            $coloresPorEstado = [
-              'Pendiente' => '#ffc107',
-              'Aprobado' => '#28a745',
-              'Rechazado' => '#dc3545',
-              'Devuelto' => '#17a2b8',
-              'Perdido' => '#673AB7',
-              'En préstamo' => '#007bff'
-            ];
+          <?php
+          $labelsEquipos = [];
+          $dataEquipos = [];
+          $coloresPorEstado = [
+            'Pendiente' => '#ffc107',
+            'Aprobado' => '#28a745',
+            'Rechazado' => '#dc3545',
+            'Devuelto' => '#17a2b8',
+            'Perdido' => '#673AB7',
+            'En préstamo' => '#007bff'
+          ];
 
-            $graficasEstadoEquipos = ControladorInicio::ctrObtenerEstadosEquipos();
+          $graficasEstadoEquipos = ControladorInicio::ctrObtenerEstadosEquipos();
 
-            foreach ($graficasEstadoEquipos as $key => $value) {
-                $labelsEquipos[] = $value["estado"];
-                $dataEquipos[] = $value["cantidad"];
-                //var_dump($labelsEquipos);
-                error_log(print_r($labelsEquipos, true));
-            }
+          foreach ($graficasEstadoEquipos as $key => $value) {
+            $labelsEquipos[] = $value["estado"];
+            $dataEquipos[] = $value["cantidad"];
+            //var_dump($labelsEquipos);
+            error_log(print_r($labelsEquipos, true));
+          }
 
-            $totalEquipos = array_sum($dataEquipos);
-            
-            ?>
+          $totalEquipos = array_sum($dataEquipos);
 
-            <!-- Tarjeta para Estados de Préstamos -->
-            <div class="col-lg-6 col-md-12">
-                <div class="card">
-                    <div class="card-header bg-dark">
-                        <h3 class="card-title"><i class="fas fa-chart-pie"></i> Estados de préstamos</h3>
-                        <div class="card-tools">
-                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="pie-chart-estados" width="200" height="200"></canvas>
-                    </div>
+          ?>
+
+          <!-- Tarjeta para Estados de Préstamos -->
+          <div class="col-lg-6 col-md-12">
+            <div class="card">
+              <div class="card-header bg-dark">
+                <h3 class="card-title"><i class="fas fa-chart-pie"></i> Estados de préstamos</h3>
+                <div class="card-tools">
+                  <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                    <i class="fas fa-minus"></i>
+                  </button>
                 </div>
+              </div>
+              <div class="card-body">
+              <canvas id="pie-chart-estados" style="min-height: 250px; height: 150px;"></canvas>
+              </div>
             </div>
+          </div>
         </div>
 
         <?php
@@ -149,18 +153,18 @@
         $colors = [];
 
         $coloresPorEstado = [
-            'Pendiente' => '#ffc107',
-            'Aprobado' => '#28a745',
-            'Rechazado' => '#dc3545',
-            'Devuelto' => '#17a2b8',
-            'Perdido' => '#673AB7',
-            'En préstamo' => '#007bff'
+          'Pendiente' => '#ffc107',
+          'Aprobado' => '#28a745',
+          'Rechazado' => '#dc3545',
+          'Devuelto' => '#17a2b8',
+          'Perdido' => '#673AB7',
+          'En préstamo' => '#007bff'
         ];
 
         foreach ($estadosPrestamos as $estado) {
-            $labels[] = $estado['estado_prestamo'];
-            $data[] = $estado['cantidad'];
-            $colors[] = $coloresPorEstado[$estado['estado_prestamo']] ?? '#6c757d';
+          $labels[] = $estado['estado_prestamo'];
+          $data[] = $estado['cantidad'];
+          $colors[] = $coloresPorEstado[$estado['estado_prestamo']] ?? '#6c757d';
         }
         ?>
 
@@ -275,14 +279,20 @@
       }
     }
   });
+
+  Chart();
 </script>
 
 <!-- // TODO: Script de los estados de los equipos -->
 <script>
   //Gráfico de Estados de Equipos
-  var totalEquipos = <?php echo array_sum($dataEquipos);?>; // Calcula el total para porcentajes
+  var totalEquipos = <?php echo array_sum($dataEquipos); ?>; // Calcula el total para porcentajes
+ 
   console.log("Cantidad total de equipos es: ", totalEquipos);
+  
+  
   const pieChartEquipos = new Chart(document.getElementById('pie-chart-equipos'), {
+    
     type: 'pie',
     data: {
       labels: <?= json_encode($labelsEquipos) ?>,
@@ -340,8 +350,13 @@
       }
     }
   });
+  
+
+  
 
   document.querySelector('#leyenda-equipos').appendChild(
     generateLegendEquipos(pieChartEquipos)
   );
+
+  
 </script>

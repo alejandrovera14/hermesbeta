@@ -93,4 +93,9 @@ class ControladorSolicitudes
         return ModeloSolicitudes::mdlContarEquiposPorReserva();
     }
 
+    public static function ctrCancelarPrestamo($idPrestamo){
+        return ModeloSolicitudes::mdlCancelarPrestamo($idPrestamo);
+}
+
+
 }

@@ -232,6 +232,31 @@ class ModeloSolicitudes
  
     }
 
+    public static function mdlCancelarPrestamo($idPrestamo)
+    {
+    $conexion = Conexion::conectar();
 
+    try {
+        $conexion->beginTransaction();
+
+        // 1. Eliminar detalles del préstamo
+        $stmtDetalle = $conexion->prepare("DELETE FROM detalle_prestamo WHERE id_prestamo = :id");
+        $stmtDetalle->bindParam(":id", $idPrestamo, PDO::PARAM_INT);
+        $stmtDetalle->execute();
+
+        // 2. Eliminar el préstamo principal
+        $stmtPrestamo = $conexion->prepare("DELETE FROM prestamos WHERE id_prestamo = :id");
+        $stmtPrestamo->bindParam(":id", $idPrestamo, PDO::PARAM_INT);
+        $stmtPrestamo->execute();
+
+        $conexion->commit();
+        return "ok";
+
+    } catch (PDOException $e) {
+        $conexion->rollBack();
+        error_log("Error cancelando préstamo: " . $e->getMessage());
+        return "error";
+    }
+}
 
 }//ModeloSolicitudes

@@ -1,87 +1,98 @@
 <?php
 
-    include_once "../controladores/solicitudes.controlador.php";
-    include_once "../modelos/solicitudes.modelo.php";
+include_once "../controladores/solicitudes.controlador.php";
+include_once "../modelos/solicitudes.modelo.php";
 
-    include_once "../controladores/equipos.controlador.php";
-    include_once "../modelos/equipos.modelo.php";
+include_once "../controladores/equipos.controlador.php";
+include_once "../modelos/equipos.modelo.php";
 
-    class AjaxSolicitudes
-    {
-        public $fechaInicio;
-        public $fechaFin;
-        public $idEquipoAgregar;
-        public $idSolicitante;
-        public $equipos;
-        public $observaciones;
-        public $idPrestamo;
-        public $motivo;
+class AjaxSolicitudes
+{
+    public $fechaInicio;
+    public $fechaFin;
+    public $idEquipoAgregar;
+    public $idSolicitante;
+    public $equipos;
+    public $observaciones;
+    public $idPrestamo;
+    public $motivo;
 
-        
         /*=============================================
             TRAER EQUIPOS DISPONIBLES
             EN EL RENGO DE FECHAS DE SOLICITUDES
         =============================================*/
-        public function ajaxMostrarEquiposDisponible()
-        {
-            
-            $valor1 = $this->fechaInicio;
-            $valor2 = $this->fechaFin;
-            $respuesta = ControladorSolicitudes::ctrMostrarEquiposDisponible($valor1, $valor2);
-            echo json_encode($respuesta);
+
+
+    public function ajaxMostrarEquiposDisponible()
+    {
+        $respuesta = ControladorSolicitudes::ctrMostrarEquiposDisponible(
+            $this->fechaInicio,
+            $this->fechaFin
+        );
+        echo json_encode($respuesta);
+    }
+
+    public function ajaxTraerEquipo()
+    {
+        $respuesta = ControladorEquipos::ctrMostrarEquipos("equipo_id", $this->idEquipoAgregar);
+        echo json_encode($respuesta);
+    }
+
+    public function ajaxGuardarSolicitud()
+    {
+        $datos = array(
+            "idSolicitante" => $this->idSolicitante,
+            "equipos" => $this->equipos,
+            "fechaInicio" => $this->fechaInicio,
+            "fechaFin" => $this->fechaFin,
+            "motivo" => $this->motivo
+        );
+        $respuesta = ControladorSolicitudes::ctrGuardarSolicitud($datos);
+        echo json_encode($respuesta);
+    }
+
+    public function ajaxMostrarSolicitudes()
+    {
+        $respuesta = ControladorSolicitudes::ctrMostrarSolicitudes("usuario_id", $this->idSolicitante);
+        echo json_encode($respuesta);
+    }
+
+    public function ajaxMostrarPrestamo()
+    {
+        $respuesta = ControladorSolicitudes::ctrMostrarPrestamo("id_prestamo", $this->idPrestamo);
+        echo json_encode($respuesta);
+    }
+
+    public function ajaxMostrarPrestamoDetalle()
+    {
+        $respuesta = ControladorSolicitudes::ctrMostrarPrestamoDetalle("id_prestamo", $this->idPrestamo);
+        echo json_encode($respuesta);
+    }
+
+    public function ajaxCancelarPrestamo()
+    {
+        $respuesta = ControladorSolicitudes::ctrCancelarPrestamo($this->idPrestamo);
+
+        if ($respuesta === "ok") {
+            echo json_encode([
+                "status" => "ok",
+                "mensaje" => "✅ Préstamo cancelado correctamente"
+            ]);
+        } else {
+            echo json_encode([
+                "status" => "error",
+                "mensaje" => "❌ No se pudo cancelar el préstamo. " . $respuesta
+            ]);
         }
+    }
+}
 
-        public function ajaxTraerEquipo()
-        {
-            $item = "equipo_id";
-            $valor = $this->idEquipoAgregar;
-            $respuesta = ControladorEquipos::ctrMostrarEquipos($item, $valor);
-            echo json_encode($respuesta);
-        }
-
-         public function ajaxGuardarSolicitud()
-        {
-            $datos = array(
-                "idSolicitante" => $this->idSolicitante,
-                "equipos" => $this->equipos,
-                "fechaInicio" => $this->fechaInicio,
-                "fechaFin" => $this->fechaFin,
-                "motivo" => $this->motivo
-            );
-            $respuesta = ControladorSolicitudes::ctrGuardarSolicitud($datos);
-            echo json_encode($respuesta);
-        }
-
-        public function ajaxMostrarSolicitudes()
-        {
-            $item = "usuario_id";
-            $valor = $this->idSolicitante;
-            $respuesta = ControladorSolicitudes::ctrMostrarSolicitudes($item, $valor);
-            echo json_encode($respuesta);
-        }
-
-        public function ajaxMostrarPrestamo(){
-            $item = "id_prestamo";
-            $valor = $this->idPrestamo;
-            $respuesta = ControladorSolicitudes::ctrMostrarPrestamo($item, $valor);
-            echo json_encode($respuesta);
-        }
-
-        public function ajaxMostrarPrestamoDetalle(){
-            $item = "id_prestamo";
-            $valor = $this->idPrestamo;
-            $respuesta = ControladorSolicitudes::ctrMostrarPrestamoDetalle($item, $valor);
-            echo json_encode($respuesta);
-        }
-
-    }// class AjaxSolicitudes
-
+// Validar la acción que viene por POST
 if (isset($_POST["accion"])) {
 
     $solicitud = new AjaxSolicitudes();
 
     switch ($_POST["accion"]) {
-
         case "guardarSolicitud":
             $solicitud->idSolicitante = $_POST["idSolicitante"];
             $solicitud->equipos = json_decode($_POST["equipos"], true);
@@ -117,9 +128,13 @@ if (isset($_POST["accion"])) {
             $solicitud->ajaxMostrarPrestamoDetalle();
             break;
 
+        case "cancelarPrestamo":
+            $solicitud->idPrestamo = $_POST["idPrestamo"];
+            $solicitud->ajaxCancelarPrestamo();
+            break;
+
         default:
-            echo json_encode("accion invalida");
+            echo json_encode(["status" => "error", "mensaje" => "Acción no reconocida"]);
             break;
     }
-
 }

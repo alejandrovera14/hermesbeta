@@ -18,11 +18,11 @@
               <tr>
                 <th>Préstamo</th>
                 <th>Solicitante</th>
-                <th>Fecha Inicio</th>
-                <th>Fecha Fin</th>
                 <th>Estado Préstamo<br><select id="selectEstadoPrestamo" class="form-control bg-dark text-white">
                     <option value="">Todos</option>
                   </select></th>
+                <th class="d-none d-md-table-cell">Fecha Inicio</th>
+                <th>Fecha Fin</th>
                 <th>Fecha Solicitud</th>
                 <th>Coo</th>
                 <th>Tic</th>
@@ -45,15 +45,15 @@
 
                   echo '<tr>
                           <td>' . $value["id_prestamo"] . '</td>
-                          <td>' . $value["solicitante"] . '</td>
-                          <td>' . date('Y-m-d H:i', strtotime($value["fecha_inicio"])) . '</td>
-                          <td>' . date('Y-m-d H:i', strtotime($value["fecha_fin"])) . '</td>';
+                          <td>' . $value["solicitante"] . '</td>';
                   if ($value["estado_prestamo"] == "Rechazado") {
                     echo '<td class="text-danger" title="Rechazado por ' . $autorizaciones["usuario_que_rechazo"] . '"> ' . $value["estado_prestamo"] . '</td>';
                   } else {
                     echo '<td>' . $value["estado_prestamo"] . '</td>';
                   };
-                  echo   '<td>' . date('Y-m-d H:i', strtotime($value["fecha_solicitud"])) . '</td>
+                  echo   '<td class="d-none d-md-table-cell">' . date('Y-m-d H:i', strtotime($value["fecha_inicio"])) . '</td>
+                          <td>' . date('Y-m-d H:i', strtotime($value["fecha_fin"])) . '</td>
+                          <td>' . date('Y-m-d H:i', strtotime($value["fecha_solicitud"])) . '</td>
                           <td>
                             <div class="icheck-primary d-inline mx-1">';
                   if ($autorizaciones["firma_coordinacion"] == "Firmado") {

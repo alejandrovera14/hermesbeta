@@ -6,7 +6,7 @@
       <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
     </li>
     <li class="nav-item d-none d-sm-inline-block">
-      <a href="#" class="nav-link">Acerca de</a>
+      <a href="acerca-de" class="nav-link">Acerca de</a>
     </li>
     <li>
       <pre><?php
@@ -84,7 +84,10 @@
     <!-- user dropdown logout -->
     <li class="nav-item dropdown">
       <a class="nav-link" data-toggle="dropdown" href="#" title="Usuario">
-        <i class="fas fa-user"></i>
+        <img src="<?php echo $_SESSION['foto'] ?>" class="img-circle mb-1 "
+          alt="User Image"
+          style="width: 20px; height: 20px; border: 1px solid #ccc;">
+        <!-- <i class="fas f?a-user"></i> -->
       </a>
       <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
         <a href="salir" class="dropdown-item">
@@ -92,7 +95,6 @@
         </a>
       </div>
     </li>
-
   </ul>
 </nav>
 <!-- /.navbar -->

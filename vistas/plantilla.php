@@ -143,6 +143,7 @@ session_start();
         $_GET["ruta"] == "desactivado" ||
         $_GET["ruta"] == "auditoria" ||
         $_GET["ruta"] == "notificaciones" ||
+        $_GET["ruta"] == "acerca-de" ||
         $_GET["ruta"] == "salir"
       ) {
 

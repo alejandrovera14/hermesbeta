@@ -455,7 +455,12 @@
                   <div class="input-group-prepend">
                     <span class="input-group-text"><i class="fas fa-key"></i></span>
                   </div>
-                  <input type="password" class="form-control" name="nuevoPassword" placeholder="Password" required>
+                  <input type="password" class="form-control" name="nuevoPassword" placeholder="Password">
+                  <div class="input-group-append">
+              <div class="input-group-text" onclick="togglePassword()" style="cursor: pointer;">
+                <span class="fas fa-eye" id="toggleIcon"></span>
+              </div>
+              </div>
                 </div>
               </div>
             </div>

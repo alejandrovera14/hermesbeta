@@ -119,7 +119,7 @@ class ModeloSolicitudes
     static public function mdlMostrarSolicitudes($item, $valor)
     {
 
-        $stmt = Conexion::conectar()->prepare("SELECT p.*  FROM prestamos p WHERE p.$item = :$item");
+        $stmt = Conexion::conectar()->prepare("SELECT p.*  FROM prestamos p WHERE p.$item = :$item AND p.estado_prestamo != 'Cancelado'");
         $stmt->bindParam(":" . $item, $valor, PDO::PARAM_INT);
         $stmt->execute();
         //VERIFICAMOS EL TAMAÑO DE LA RESPUESTA
@@ -239,24 +239,36 @@ class ModeloSolicitudes
     try {
         $conexion->beginTransaction();
 
-        // 1. Eliminar detalles del préstamo
-        $stmtDetalle = $conexion->prepare("DELETE FROM detalle_prestamo WHERE id_prestamo = :id");
-        $stmtDetalle->bindParam(":id", $idPrestamo, PDO::PARAM_INT);
-        $stmtDetalle->execute();
+        // 1. Actualizar el estado del préstamo
+        $stmt1 = $conexion->prepare("UPDATE prestamos SET estado_prestamo = 'Cancelado' WHERE id_prestamo = :id");
+        $stmt1->bindParam(":id", $idPrestamo, PDO::PARAM_INT);
+        $stmt1->execute();
 
-        // 2. Eliminar el préstamo principal
-        $stmtPrestamo = $conexion->prepare("DELETE FROM prestamos WHERE id_prestamo = :id");
-        $stmtPrestamo->bindParam(":id", $idPrestamo, PDO::PARAM_INT);
-        $stmtPrestamo->execute();
+        // 2. Obtener los equipos asociados a este préstamo
+        $stmt2 = $conexion->prepare("SELECT equipo_id FROM detalle_prestamo WHERE id_prestamo = :id");
+        $stmt2->bindParam(":id", $idPrestamo, PDO::PARAM_INT);
+        $stmt2->execute();
+        $equipos = $stmt2->fetchAll(PDO::FETCH_COLUMN);
+
+        // 3. Marcar los equipos como disponibles
+        if (!empty($equipos)) {
+            $in = implode(',', array_fill(0, count($equipos), '?'));
+            $stmt3 = $conexion->prepare("UPDATE equipos SET id_estado = 1 WHERE equipo_id IN ($in)");
+            foreach ($equipos as $k => $equipoId) {
+                $stmt3->bindValue($k + 1, $equipoId, PDO::PARAM_INT);
+            }
+            $stmt3->execute();
+        }
 
         $conexion->commit();
         return "ok";
 
     } catch (PDOException $e) {
         $conexion->rollBack();
-        error_log("Error cancelando préstamo: " . $e->getMessage());
+        error_log("❌ Error cancelando préstamo: " . $e->getMessage());
         return "error";
     }
 }
+
 
 }//ModeloSolicitudes
